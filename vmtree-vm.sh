@@ -22,7 +22,8 @@ fi
 # Friendlier variable
 REQUSER="${PARTS[0]}"
 REQVM="${PARTS[1]}"
-REQIMAGE="${PARTS[2]:-ubuntu22}"
+REQIMAGE="${PARTS[2]:-ubuntu2204}"
+REQETC="${PARTS[3]}"
 # Force "prefix-" to VM, but let anyone use "dev"
 if [[ "$REQUSER" == "dev" ]]; then
 	# Set USER
@@ -43,8 +44,8 @@ lxc list -c nst4mclN "^${USER}-" >&2
 # Images
 declare -A images
 # Best:
-images["ubuntu20"]="ubuntu:20.04"                  # Works 100%
-images["ubuntu22"]="ubuntu:22.04"                  # Works 100%
+images["ubuntu2004"]="ubuntu:20.04"                  # Works 100%
+images["ubuntu2204"]="ubuntu:22.04"                  # Works 100%
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
@@ -62,11 +63,24 @@ IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
 # Show info
 echo "You requested VM=$VM IMAGE=$IMAGE" >&2
 
+# Default lxc options
+OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
+
+# REAL VM (as opposed to container) mode
+# XXX EXPERIMENTAL!
+# XXX No way to "killme" it, no way to "nokill" it, no way to "nopassword", etc
+if [[ "$REQETC" == "vm" ]]; then
+	# This changes EVERYTHING (in OPTS)
+	OPTS=( "--vm" )
+	# Set REAL VMs ephemeral for now, as an alternative way to kill it on demand.
+	OPTS+=( "-e" )
+fi
+
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
 	# launch docker-capable vm
 	echo "Initializing" >&2
-	lxc init "${IMAGE}" "$VM" "${OPTS[@]}" -c security.nesting=true -c linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan >&2 </dev/null
+	lxc init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
 	# Mount disk if exists
 	if [[ -d "$DISKPATH" ]]; then
 		echo "Attaching disks/$DISK" >&2
@@ -131,9 +145,9 @@ _getip() {
 	# Get info of VM
 	# Looks like:
 	# kk-tmp,"172.17.0.1 (docker0) 10.237.243.99 (eth0)"
-	IP="$(lxc list --format csv -c n4 "^${VM}$" | grep -o '\<[0-9.]\+ (eth0)')"
+	IP="$(lxc list --format csv -c n4 "^${VM}$" | grep -o '\<[0-9.]\+ (e[tn][hp]')"
 	# Strip iface name
-	IP="${IP% (eth0)}"
+	IP="${IP% (e[tn][hp]*}"
 	# Return
 	echo "$IP"
 }
