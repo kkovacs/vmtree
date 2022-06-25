@@ -1,0 +1,13 @@
+# The main domain that points here. No http/https, no trailing dot.
+# Example: DOMAIN="example.com"
+DOMAIN="${DOMAIN}"
+
+# acme.sh DNS provider setup.
+# More info:
+# https://github.com/acmesh-official/acme.sh/wiki/dnsapi
+#
+# Parameter to give to "--dns" for acme.sh
+ACME_DNS="${ACME_DNS:-dns_dgon}"
+# Provider-specific variables:
+# (Need to be exported so acme.sh picks it up)
+export DO_API_KEY="${DO_API_KEY}"

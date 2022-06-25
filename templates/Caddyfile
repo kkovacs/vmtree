@@ -1,5 +1,7 @@
-*.${DOMAIN}:80 {
-        #tls /etc/caddy/${DOMAIN}.crt /etc/caddy/${DOMAIN}.key
+*.${DOMAIN} {
+
+	$([[ ! -f /root/.acme.sh/*.${DOMAIN}/fullchain.cer ]] && echo "#") tls internal
+	$([[ -f /root/.acme.sh/*.${DOMAIN}/fullchain.cer ]] && echo "#") tls /root/.acme.sh/*.${DOMAIN}/fullchain.cer /root/.acme.sh/*.${DOMAIN}/*.${DOMAIN}.key
 
         @auth {
                 not {

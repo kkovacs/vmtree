@@ -23,11 +23,19 @@ if [[ "$(pwd)" != "/vmtree" ]]; then
 	exit 1
 fi
 
+# If .env doesn't exist, initialize it
+if [[ ! -f .env ]]; then
+	_template templates/env .env
+fi
+
 # Configuration
-source .env || true
-# Shellcheck thinks it's unused, but it's not.
-# shellcheck disable=SC2034
-DOMAIN="example.com" # XXX
+source .env
+
+# Do we know our domain already? (From the .env file, usually)
+if [[ -z "$DOMAIN" ]]; then
+	echo "Please edit and fill out the .env file!"
+	exit 1
+fi
 
 # Ensure /vmtree
 install -o root -g root -m 755 -d /vmtree
@@ -72,9 +80,18 @@ _template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
 # Restart/reload caddy
 systemctl reload-or-restart caddy
 
+# Ensure permissions on ssh pubkeys
+# (When copied, they tend to be 600, but they are public after all,
+# and the vmtree-vm.sh script needs to read them.)
+chmod 644 keys/*
+
 # Create users with authorized_keys
-# XXX Error if no keys at all
 for user in keys/*; do
+	# Sanity check: are there any ssh keys?
+	if [[ "$user" == "keys/*" ]]; then
+		echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."
+		exit 1
+	fi
 	# Load ssh key
 	# Shellcheck thinks it's unused, but it's not.
 	# shellcheck disable=SC2034
@@ -107,7 +124,16 @@ sudo systemctl daemon-reload
 # Start the service, now and forever
 sudo systemctl enable --now lxd-dns-lxdbr0
 
-# XXX Set up acme.sh
+# Set up acme.sh to prpcure wildcard tls.
+# NOTE: I'm not happy that it installs under /root,
+# but it's buggy otherwise as of 2022-06-25.
+if [[ ! -f /root/.acme.sh/acme.sh ]]; then
+	# We don't need cron, we will do that ourselves, because we need other functionality
+	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
+fi
+
+# Settings come from .env
+/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
 
 # Set up crontab
 crontab <<"EOF"

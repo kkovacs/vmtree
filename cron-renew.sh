@@ -6,9 +6,10 @@ cd "$(dirname "$0")" || exit
 # Source env
 source .env
 
-/vmtree/.acme.sh/acme.sh --cron --home "/vmtree/.acme.sh"
-cp /vmtree/.acme.sh/*.kr7.hu/fullchain.cer /etc/caddy/kr7.hu.crt
-cp /vmtree/.acme.sh/*.kr7.hu/*.kr7.hu.key /etc/caddy/kr7.hu.key
+# Run what acme.sh would put in cron
+/root/.acme.sh/acme.sh --cron --home "/root/.acme.sh"
+
+# Restart Caddy
 systemctl restart caddy.service
 
 # To prevent HTTP AUTH coming back at night because of the restart,
