@@ -4,12 +4,14 @@
 shopt -s lastpipe extglob
 
 # Force location
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
 
 # Strip VM name of domain, then split on "-"
+# Shellcheck thinks we don't want splitting, but we do.
+# shellcheck disable=SC2206
 IFS="-" PARTS=( ${1%%.*} )
 
 # Sanity check

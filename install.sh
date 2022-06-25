@@ -5,7 +5,7 @@ set -ex
 # Needed for mapfile
 shopt -s lastpipe
 # Force location
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 # Load helper functions
 source lib.sh
 
@@ -25,6 +25,8 @@ fi
 
 # Configuration
 source .env || true
+# Shellcheck thinks it's unused, but it's not.
+# shellcheck disable=SC2034
 DOMAIN="example.com" # XXX
 
 # Ensure /vmtree
@@ -74,6 +76,8 @@ systemctl reload-or-restart caddy
 # XXX Error if no keys at all
 for user in keys/*; do
 	# Load ssh key
+	# Shellcheck thinks it's unused, but it's not.
+	# shellcheck disable=SC2034
 	mapfile -t pubkeys <"$user"
 	# trim directory name
 	user="${user##*/}"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Force location
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
