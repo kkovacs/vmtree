@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 # Find marker file
 for a in /var/snap/lxd/common/lxd/storage-pools/default/containers/*/rootfs/killme; do
 	VM="$(echo "$a" | awk -F/ '{print $10}')";

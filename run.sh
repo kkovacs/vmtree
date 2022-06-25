@@ -4,6 +4,8 @@
 set -ex
 # Needed for mapfile
 shopt -s lastpipe
+# Force location
+cd "$(dirname "$0")"
 # Load helper functions
 source lib.sh
 
@@ -12,9 +14,6 @@ if [[ $EUID -ne 0 ]]; then
 	echo "Please run as root!"
 	exit 1
 fi
-
-# Force location
-cd "$(dirname "$0")"
 
 # Check if we are at the right place.
 # We are weird like that,
@@ -79,6 +78,8 @@ systemctl reload-or-restart caddy
 
 # Create users with authorized_keys
 for user in keys/*; do
+	# Load ssh key
+	mapfile -t pubkeys <"$user"
 	# trim directory name
 	user="${user##*/}"
 	if [[ ! -d "/home/${user}" ]]; then

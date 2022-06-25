@@ -98,12 +98,26 @@ fi
 echo "Starting" >&2
 lxc start "$VM" >/dev/null >&2
 
+# _getip returns the IP address of an LXD container or nothing.
+_getip() {
+	local VM="$1"
+	local IP
+	# Ubuntu 22.04
+	#IP="$(lxc info "$VM" | grep "inet[^6].*global" | awk '{print $2}')"
+	# Ubuntu 20.04
+	IP="$(lxc info "$VM" | grep "eth0:.*inet[^6]" | awk '{print $3}')"
+	# Strip netmask
+	IP=${IP%/*}
+	# Return
+	echo "$IP"
+}
+
 # Wait for IP
 echo -n "Getting IP" >&2
-IP="$(lxc info "$VM" | grep "inet[^6].*global" | awk '{print $2}')"
+IP="$(_getip "$VM")"
 until [[ "${#IP}" -gt 0 ]]; do
 	# Get IP of VM
-	IP="$(lxc info "$VM" | grep "inet[^6].*global" | awk '{print $2}')"
+	IP="$(_getip "$VM")"
 	if [[ "${#IP}" -gt 0 ]]; then
 		sleep 5 # XXX Wait for SSH to start
 		break;
@@ -111,8 +125,6 @@ until [[ "${#IP}" -gt 0 ]]; do
 	echo -n "." >&2
 	sleep 1
 done
-# Strip netmask
-IP=${IP%/*}
 echo ": $IP" >&2
 
 # Mini-howto
