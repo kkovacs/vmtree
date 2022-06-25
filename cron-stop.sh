@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Cron doesn't have this in PATH
+export PATH="$PATH:/snap/bin"
+
 # Log current state
 LOGFILE=/vmtree/log/state-`date +%Y%m%d`.txt
 lxc list --format csv -c nstcl46SN >$LOGFILE

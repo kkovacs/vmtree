@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Cron doesn't have this in PATH
+export PATH="$PATH:/snap/bin"
+
 # Find marker file
 for a in /var/snap/lxd/common/lxd/storage-pools/default/containers/*/rootfs/killme; do
 	VM="$(echo "$a" | awk -F/ '{print $10}')";

@@ -3,6 +3,9 @@
 # Location of file to use
 FILE=/etc/caddy/nopasswd-hosts
 
+# Cron doesn't have this in PATH
+export PATH="$PATH:/snap/bin"
+
 # Store original checksum
 CHECKSUM1=$(sha256sum "$FILE" | awk '{print $1}')
 
