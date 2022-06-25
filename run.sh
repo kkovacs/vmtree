@@ -95,6 +95,20 @@ for user in keys/*; do
 	_template  "authorized_keys.template" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
 done
 
+# Set up systemd-resolved,
+# to be able to reach VMs by name from the host machine.
+# Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
+# Get lxd's dnsmasq IP
+DNSIP="$(lxc network get lxdbr0 ipv4.address)"
+# Strip netmask
+DNSIP="${DNSIP%/*}"
+# Create the service file
+_template lxd-dns-lxdbr0.service.template /etc/systemd/system/lxd-dns-lxdbr0.service
+# Make systemd learn about our new service
+sudo systemctl daemon-reload
+# Start the service, now and forever
+sudo systemctl enable --now lxd-dns-lxdbr0
+
 # XXX Set up acme.sh
 
 # Set up crontab
