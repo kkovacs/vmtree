@@ -16,6 +16,7 @@ IFS="-" PARTS=( ${1%%.*} )
 
 # Sanity check
 if [[ ${#PARTS[@]} -lt 2 ]]; then
+	echo "Please use the format: user-vmname" >&2
 	exit 1
 fi
 
@@ -38,7 +39,7 @@ DISK="$USER"
 VM="$USER-$REQVM"
 DISKPATH="/vmtree/disks/$DISK"
 
-echo "Just FYI - you have the following VMs:" >&2
+echo "Just FYI - you have the following VMs here:" >&2
 lxc list -c nst4,image.release,mcl "^${USER}-" >&2
 
 # Images
@@ -57,11 +58,11 @@ images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly teste
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # No SSH running
-echo -e "Available images (vm-name-IMAGE.${DOMAIN}):\n${!images[@]}" >&2
+echo -e "Available images (user-vmname-IMAGE): ${!images[@]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
 
 # Show info
-echo "You requested VM=$VM IMAGE=$IMAGE" >&2
+echo "You are getting VM=$VM IMAGE=$IMAGE" >&2
 
 # Default lxc options
 OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
@@ -75,6 +76,21 @@ if [[ "$REQETC" == "vm" ]]; then
 	# Set REAL VMs ephemeral for now, as an alternative way to kill it on demand.
 	OPTS+=( "-e" )
 fi
+
+# Print infos here.
+# Maybe it gets read while the user is waiting.
+cat >&2 <<"EOF"
+
+====================================== N E W S ======================================
+On this new VMTREE, some things are different from the old one:
+- All VMs die at night by DEFAULT. Even "dev-xxx" VMs.
+- BUT! YOU CAN make any VM survive the night by running: "sudo touch /nokill"
+  - "nokill"-ed "dev-xxx" VMs will keep running (don't power down).
+  - "nokill"-ed "personal" VMs will POWER DOWN at night, but DON'T get deleted.
+- Running "sudo poweroff" to destroy a VM doesn't work anymore. Use "sudo touch /killme"
+=====================================================================================
+
+EOF
 
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
@@ -118,11 +134,11 @@ packages:
 write_files:
 - path: /etc/motd
   content: |
-    ======== Mini-HOWTO ========
+    ================== Mini-HOWTO ==================
     Destroy this VM: ..................... sudo touch /killme
     Make this VM survive the night: ...... sudo touch /nokill
     Disable HTTP password protection: .... sudo touch /nopassword
-    ============================
+    ================================================
 - path: /etc/docker/daemon.json
   content: |
     { "storage-driver": "overlay2" }
@@ -138,48 +154,24 @@ fi
 echo "Starting" >&2
 lxc start "$VM" >/dev/null >&2
 
-# _getip returns the IP address of an LXD container or nothing.
-_getip() {
-	local VM="$1"
-	local IP
-	# Get info of VM
-	# Looks like:
-	# kk-tmp,"172.17.0.1 (docker0) 10.237.243.99 (eth0)"
-	IP="$(lxc list --format csv -c n4 "^${VM}$" | grep -o '\<[0-9.]\+ (e[tn][hp]')"
-	# Strip iface name
-	IP="${IP% (e[tn][hp]*}"
-	# Return
-	echo "$IP"
-}
-
 # Wait for IP
+# NOTE: The reason for the double test is that if it's an OLD vm,
+# then SSH is probably already running, no need to wait even a litte.
+# On the other hand, if it's a NEW vm,
+# then ssh needs some time to generate keys and start.
 echo -n "Getting IP" >&2
-IP="$(_getip "$VM")"
-until [[ "${#IP}" -gt 0 ]]; do
-	# Get IP of VM
-	IP="$(_getip "$VM")"
-	if [[ "${#IP}" -gt 0 ]]; then
+IPS="$(lxc list --format csv -c 4 "^${VM}$")"
+until [[ "${#IPS}" -gt 1 ]]; do
+	IPS="$(lxc list --format csv -c 4 "^${VM}$")"
+	if [[ "${#IPS}" -gt 1 ]]; then
 		sleep 5 # XXX Wait for SSH to start
 		break;
 	fi
 	echo -n "." >&2
 	sleep 1
 done
-echo ": $IP" >&2
-
-# Mini-howto
-cat >&2 <<EOF
-
-==================== NEWS ====================
-On this new VMTREE, some things are different from the old one:
-- All VMs are ephemeral (die at night) by default. Even dev-xxx VMs.
-- BUT, you CAN make ANY VM not-ephemeral (survive the night) by: "sudo touch /nokill"
-- If "nokill"-ed, dev-xxx VMs stay running. Personal ones still power down at night, as usual.
-- Using "sudo poweroff" to destroy a VM doesn't work anymore. Use "sudo touch /killme"
-==============================================
-
-EOF
+echo " IPs: $IPS" >&2
 
 # stdio fwd
 echo "Connecting" >&2
-nc "$IP" 22
+nc "${VM}.lxd" 22
