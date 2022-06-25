@@ -139,9 +139,9 @@ write_files:
     Make this VM survive the night: ...... sudo touch /nokill
     Disable HTTP password protection: .... sudo touch /nopassword
     ================================================
-- path: /etc/docker/daemon.json
-  content: |
-    { "storage-driver": "overlay2" }
+#- path: /etc/docker/daemon.json
+#  content: |
+#    { "storage-driver": "overlay2" }
 - path: /etc/sysctl.d/95-unprivileged-ports.conf
   content: |
     net.ipv4.ip_unprivileged_port_start=0
