@@ -1,0 +1,1 @@
+$(for pubkey in "${pubkeys[@]}"; do echo command=\"/vmtree/vmtree-vm.sh \$SSH_ORIGINAL_COMMAND\" "$pubkey"; done)

@@ -1,0 +1,13 @@
+*.${domain}:80 {
+        #tls /etc/caddy/${domain}.crt /etc/caddy/${domain}.key
+
+        @auth {
+                not {
+                        host placeholder-httpnoauth.${domain}
+                }
+        }
+
+        reverse_proxy {
+                to "{http.request.host.labels.2}.lxd:80"
+        }
+}
