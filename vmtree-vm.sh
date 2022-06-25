@@ -6,6 +6,9 @@ shopt -s lastpipe extglob
 # Force location
 cd "$(dirname "$0")"
 
+# Source env
+source .env
+
 # Strip VM name of domain, then split on "-"
 IFS="-" PARTS=( ${1%%.*} )
 

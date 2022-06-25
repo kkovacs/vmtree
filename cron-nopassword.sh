@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Force location
+cd "$(dirname "$0")"
+
+# Source env
+source .env
+
 # Location of file to use
 FILE=/etc/caddy/nopasswd-hosts
 

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Force location
+cd "$(dirname "$0")"
+
+# Source env
+source .env
+
 # Cron doesn't have this in PATH
 export PATH="$PATH:/snap/bin"
 

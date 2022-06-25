@@ -1,9 +1,9 @@
-*.${domain}:80 {
-        #tls /etc/caddy/${domain}.crt /etc/caddy/${domain}.key
+*.${DOMAIN}:80 {
+        #tls /etc/caddy/${DOMAIN}.crt /etc/caddy/${DOMAIN}.key
 
         @auth {
                 not {
-                        host placeholder-httpnoauth.${domain}
+                        host placeholder-httpnoauth.${DOMAIN}
                 }
         }
 

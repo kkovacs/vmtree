@@ -20,18 +20,12 @@ fi
 # but no, I'm not making anything configurable unless absolutely needed.
 if [[ "$(pwd)" != "/vmtree" ]]; then
 	echo "Please move everything to the /vmtree/ directory."
-
-	## XXX for dev
-	#echo "I'll do it for you."
-	#find . -path "./.git" -prune -o -type d -exec bash -c "install -o root -g root -d \"/vmtree/{}\"" \;
-	#find . -path "./.git" -prune -o -type f -exec bash -c "ln -s \"$(pwd)/{}\" /vmtree/{}" \;
-	#ln -s "$(pwd)/.git" /vmtree/.git
 	exit 1
 fi
 
 # Configuration
 source .env || true
-domain="kr7.hu"
+DOMAIN="example.com" # XXX
 
 # Ensure /vmtree
 install -o root -g root -m 755 -d /vmtree
@@ -71,7 +65,7 @@ snap install --classic lxd
 lxd init --auto
 
 # Configure Caddy
-_template Caddyfile.template /etc/caddy/Caddyfile -o root -g root -m 644
+_template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
 
 # Restart/reload caddy
 systemctl reload-or-restart caddy
@@ -92,7 +86,7 @@ for user in keys/*; do
 	install -o 1001000 -g 1001000 -d "$DISKPATH"
 	# Set up restricted key
 	install -o "${user}" -g "${user}" -m 700 -d "/home/${user}/.ssh"
-	_template  "authorized_keys.template" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
+	_template  "templates/authorized_keys" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
 done
 
 # Set up systemd-resolved,
@@ -103,7 +97,7 @@ DNSIP="$(lxc network get lxdbr0 ipv4.address)"
 # Strip netmask
 DNSIP="${DNSIP%/*}"
 # Create the service file
-_template lxd-dns-lxdbr0.service.template /etc/systemd/system/lxd-dns-lxdbr0.service
+_template templates/lxd-dns-lxdbr0.service /etc/systemd/system/lxd-dns-lxdbr0.service
 # Make systemd learn about our new service
 sudo systemctl daemon-reload
 # Start the service, now and forever
