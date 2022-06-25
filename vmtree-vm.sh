@@ -102,12 +102,15 @@ lxc start "$VM" >/dev/null >&2
 _getip() {
 	local VM="$1"
 	local IP
-	# Ubuntu 22.04
-	#IP="$(lxc info "$VM" | grep "inet[^6].*global" | awk '{print $2}')"
-	# Ubuntu 20.04
-	IP="$(lxc info "$VM" | grep "eth0:.*inet[^6]" | awk '{print $3}')"
-	# Strip netmask
-	IP=${IP%/*}
+	# Not super happy about it, but couldn't make this version-independent.
+	# If you think you CAN, please also test on VMs that have more than one network interfaces (docker, etc), because that's where it gets complicated.
+
+	# Get info of VM
+	# Looks like:
+	# kk-tmp,"172.17.0.1 (docker0) 10.237.243.99 (eth0)"
+	IP="$(lxc list --format csv -c n4 "^${VM}$" | grep -o '\<[0-9.]\+ (eth0)')"
+	# Strip iface name
+	IP="${IP% (eth0)}"
 	# Return
 	echo "$IP"
 }
