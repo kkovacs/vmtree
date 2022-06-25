@@ -6,10 +6,11 @@ cd "$(dirname "$0")" || exit
 # Source env
 source .env
 
-/root/.acme.sh/acme.sh --cron --home "/root/.acme.sh"
-cp /root/.acme.sh/*.kr7.hu/fullchain.cer /etc/caddy/kr7.hu.crt
-cp /root/.acme.sh/*.kr7.hu/*.kr7.hu.key /etc/caddy/kr7.hu.key
+/vmtree/.acme.sh/acme.sh --cron --home "/vmtree/.acme.sh"
+cp /vmtree/.acme.sh/*.kr7.hu/fullchain.cer /etc/caddy/kr7.hu.crt
+cp /vmtree/.acme.sh/*.kr7.hu/*.kr7.hu.key /etc/caddy/kr7.hu.key
 systemctl restart caddy.service
 
-# To prevent HTTP AUTH coming back at night, we force the caching mechanism of `nopasswd` to set the machines
+# To prevent HTTP AUTH coming back at night because of the restart,
+# force the change detection mechanism of "cron-nopasswd.sh" to set things up fresh.
 echo > /etc/caddy/nopasswd-hosts
