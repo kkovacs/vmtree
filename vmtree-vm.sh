@@ -79,18 +79,7 @@ fi
 
 # Print infos here.
 # Maybe it gets read while the user is waiting.
-cat >&2 <<"EOF"
-
-====================================== N E W S ======================================
-On this new VMTREE, some things are different from the old one:
-- All VMs die at night by DEFAULT. Even "dev-xxx" VMs.
-- BUT! YOU CAN make any VM survive the night by running: "sudo touch /nokill"
-  - "nokill"-ed "dev-xxx" VMs will keep running (don't power down).
-  - "nokill"-ed "personal" VMs will POWER DOWN at night, but DON'T get deleted.
-- Running "sudo poweroff" to destroy a VM doesn't work anymore. Use "sudo touch /killme"
-=====================================================================================
-
-EOF
+cat >&2 <motd
 
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
