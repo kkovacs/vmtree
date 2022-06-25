@@ -32,7 +32,7 @@ VM="$USER-$VM"
 DISKPATH="/vmtree/disks/$DISK"
 
 echo "Just FYI - you have the following VMs:" >&2
-lxc list -c nst4mclN "${USER}-" >&2
+lxc list -c nst4mclN "^${USER}-" >&2
 
 # Show info
 echo "You requested VM=$VM" >&2

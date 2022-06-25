@@ -77,6 +77,7 @@ _template Caddyfile.template /etc/caddy/Caddyfile -o root -g root -m 644
 systemctl reload-or-restart caddy
 
 # Create users with authorized_keys
+# XXX Error if no keys at all
 for user in keys/*; do
 	# Load ssh key
 	mapfile -t pubkeys <"$user"
@@ -93,10 +94,6 @@ for user in keys/*; do
 	install -o "${user}" -g "${user}" -m 700 -d "/home/${user}/.ssh"
 	_template  "authorized_keys.template" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
 done
-
-## Build cloud-config
-#cat keys/* | mapfile -t pubkeys
-#_template  "cloud-config.template" "/vmtree/cloud-config"
 
 # XXX Set up acme.sh
 
