@@ -20,33 +20,53 @@ if [[ ${#PARTS[@]} -lt 2 ]]; then
 fi
 
 # Friendlier variable
-OWNER="${PARTS[0]}"
-VM="${PARTS[1]}"
+REQUSER="${PARTS[0]}"
+REQVM="${PARTS[1]}"
+REQIMAGE="${PARTS[2]:-ubuntu22}"
 # Force "prefix-" to VM, but let anyone use "dev"
-if [[ "$OWNER" == "dev" ]]; then
+if [[ "$REQUSER" == "dev" ]]; then
 	# Set USER
 	USER="dev"
 	# Load ALL keys
-	cat /vmtree/keys/* | mapfile -t pubkeys
+	cat /vmtree/keys/* | mapfile -t PUBKEYS
 else
 	# Load ONLY USER's key
-	mapfile -t pubkeys <"/vmtree/keys/$USER"
+	mapfile -t PUBKEYS <"/vmtree/keys/$USER"
 fi
 DISK="$USER"
-VM="$USER-$VM"
+VM="$USER-$REQVM"
 DISKPATH="/vmtree/disks/$DISK"
 
 echo "Just FYI - you have the following VMs:" >&2
 lxc list -c nst4mclN "^${USER}-" >&2
 
+# Images
+declare -A images
+# Best:
+images["ubuntu20"]="ubuntu:20.04"                  # Works 100%
+images["ubuntu22"]="ubuntu:22.04"                  # Works 100%
+# Others:
+images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
+images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
+images["centos8"]="images:centos/8-Stream/cloud"   # Works, not thoroughly tested
+images["centos9"]="images:centos/9-Stream/cloud"   # Works, not thoroughly tested
+images["debian11"]="images:debian/11/cloud"        # First connect never works, SSH install takes time
+images["debian12"]="images:debian/12/cloud"        # First connect never works, SSH install takes time
+images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly tested
+# Tested NOT working:
+#images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
+#images["alpine"]="images:alpine/edge/cloud"       # No SSH running
+echo -e "Available images (vm-name-IMAGE.${DOMAIN}):\n${!images[@]}" >&2
+IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
+
 # Show info
-echo "You requested VM=$VM" >&2
+echo "You requested VM=$VM IMAGE=$IMAGE" >&2
 
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
 	# launch docker-capable vm
 	echo "Initializing" >&2
-	lxc init ubuntu:20.04 "$VM" "${OPTS[@]}" -c security.nesting=true -c linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan >&2 </dev/null
+	lxc init "${IMAGE}" "$VM" "${OPTS[@]}" -c security.nesting=true -c linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan >&2 </dev/null
 	# Mount disk if exists
 	if [[ -d "$DISKPATH" ]]; then
 		echo "Attaching disks/$DISK" >&2
@@ -59,27 +79,28 @@ if ! lxc info "$VM" >/dev/null 2>&1 ; then
 users:
 - name: user
   ssh_authorized_keys:
-$(for pubkey in "${pubkeys[@]}"; do echo "  - ${pubkey}"; done)
+$(for pubkey in "${PUBKEYS[@]}"; do echo "  - ${pubkey}"; done)
   shell: /bin/bash
   sudo: "ALL=(ALL) NOPASSWD:ALL"
 package_update: true
 packages:
-- less
-- psmisc
-- screen
-- htop
-- curl
-- wget
 - bash-completion
+- curl
 - dnsutils
 - git
-- tig
-- socat
+- htop
+- less
+- openssh-server
+- psmisc
 - rsync
-- vim-nox
-- zip
-- unzip
+- screen
+- socat
+- tig
 - unattended-upgrades
+- unzip
+- vim-nox
+- wget
+- zip
 write_files:
 - path: /etc/motd
   content: |
@@ -107,9 +128,6 @@ lxc start "$VM" >/dev/null >&2
 _getip() {
 	local VM="$1"
 	local IP
-	# Not super happy about it, but couldn't make this version-independent.
-	# If you think you CAN, please also test on VMs that have more than one network interfaces (docker, etc), because that's where it gets complicated.
-
 	# Get info of VM
 	# Looks like:
 	# kk-tmp,"172.17.0.1 (docker0) 10.237.243.99 (eth0)"
