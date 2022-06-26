@@ -6,5 +6,6 @@ On this new VMTREE, some things are different from the old one:
   - "nokill"-ed "dev-xxx" VMs will keep running (don't power down).
   - "nokill"-ed "personal" VMs will POWER DOWN at night, but DON'T get deleted.
 - Running "sudo poweroff" to destroy a VM doesn't work anymore. Use "sudo touch /killme"
+- People can ssh into each other's VMs IF the VM's owner puts in the ssh key.
 =====================================================================================
 

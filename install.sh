@@ -59,7 +59,16 @@ install -o root -g root -m 750 -d /vmtree/log
 # and the vmtree-vm.sh script needs to read them.)
 chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."; exit 1; }
 
-# Create users with authorized_keys
+# Create vmtree unix user
+if [[ ! -d "/home/vmtree" ]]; then
+	adduser --disabled-password --gecos "" "vmtree"
+	usermod -G lxd "vmtree"
+	# Ensure directory
+	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
+fi
+# Clear ssh pubkey file for filling up
+install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
+# Add authorized_keys to vmtree user
 for user in keys/*; do
 	# Load ssh key
 	# Shellcheck thinks it's unused, but it's not.
@@ -67,16 +76,13 @@ for user in keys/*; do
 	mapfile -t pubkeys <"$user"
 	# trim directory name
 	user="${user##*/}"
-	if [[ ! -d "/home/${user}" ]]; then
-		adduser --disabled-password --gecos "" "${user}"
-		usermod -G lxd "${user}"
-	fi
 	# Make disk
 	DISKPATH="/vmtree/disks/${user}"
 	install -o 1001000 -g 1001000 -d "$DISKPATH"
-	# Set up restricted key
-	install -o "${user}" -g "${user}" -m 700 -d "/home/${user}/.ssh"
-	_template  "templates/authorized_keys" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
+	# Add restricted key(s)
+	for pubkey in "${pubkeys[@]}"; do
+		echo "command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
+	done
 done
 
 ########################################
@@ -178,10 +184,8 @@ Now put this in your .ssh/config:
 
 Host *.wp1.pw
         User user
-        ProxyCommand ssh dev@${DOMAIN} "%h"
+        ProxyCommand ssh vmtree@${DOMAIN} "%h"
         UserKnownHostsFile /dev/null
         StrictHostKeyChecking no
         ForwardAgent yes
-
-You can replace "dev" with personal user names (the file names of your SSH keys in /vmtree/keys/).
 EOF

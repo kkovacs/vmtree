@@ -9,6 +9,10 @@ cd "$(dirname "$0")" || exit
 # Source env
 source .env
 
+# Script's first parameter is ssh pubkey name (username)
+SSHUSER="$1"
+shift
+
 # Strip VM name of domain, then split on "-"
 # Shellcheck thinks we don't want splitting, but we do.
 # shellcheck disable=SC2206
@@ -16,7 +20,7 @@ IFS="-" PARTS=( ${1%%.*} )
 
 # Sanity check
 if [[ ${#PARTS[@]} -lt 2 ]]; then
-	echo "Please use the format: user-vmname" >&2
+	echo "ERROR: Please use the format: $SSHUSER-vmname.$DOMAIN or dev-vmname.$DOMAIN" >&2
 	exit 1
 fi
 
@@ -26,21 +30,28 @@ REQVM="${PARTS[1]}"
 REQIMAGE="${PARTS[2]:-ubuntu2204}"
 REQETC="${PARTS[3]}"
 # Force "prefix-" to VM, but let anyone use "dev"
+VMUSER="$REQUSER"
 if [[ "$REQUSER" == "dev" ]]; then
-	# Set USER
-	USER="dev"
 	# Load ALL keys
 	cat /vmtree/keys/* | mapfile -t PUBKEYS
+	# Force VMUSER to "dev"
+	DISK="dev"
+	VMUSER="dev"
 else
-	# Load ONLY USER's key
-	mapfile -t PUBKEYS <"/vmtree/keys/$USER"
+	# Load ONLY SSHUSER's key(s)
+	mapfile -t PUBKEYS <"/vmtree/keys/$SSHUSER"
+	DISK="$SSHUSER"
+	# NOTE: If you uncomment this,
+	# then people won't be able to SSH into each other's VMs,
+	# even if their key was put into the other's VM.
+	# VMUSER="$SSHUSER"
 fi
-DISK="$USER"
-VM="$USER-$REQVM"
+# Build final physical variables
+VM="$VMUSER-$REQVM"
 DISKPATH="/vmtree/disks/$DISK"
 
 echo "Just FYI - you have the following VMs here:" >&2
-lxc list -c nst4,image.release,mcl "^${USER}-" >&2
+lxc list -c nst4,image.release,mcl "^${VMUSER}-" >&2
 
 # Images
 declare -A images
@@ -58,11 +69,11 @@ images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly teste
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # No SSH running
-echo -e "Available images (user-vmname-IMAGE): ${!images[@]}" >&2
+echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
 
 # Show info
-echo "You are getting VM=$VM IMAGE=$IMAGE" >&2
+echo "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK" >&2
 
 # Default lxc options
 OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
@@ -79,10 +90,15 @@ fi
 
 # Print infos here.
 # Maybe it gets read while the user is waiting.
-cat >&2 <motd
+cat >&2 <templates/motd
 
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
+	# Sanity check
+	if [[ "$VMUSER" != "$SSHUSER" && "$VMUSER" != "dev" ]]; then
+		echo "ERROR: you can only start VMs called $SSHUSER-xxx and dev-xxx" >&2
+		exit 1
+	fi
 	# launch docker-capable vm
 	echo "Initializing" >&2
 	lxc init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
