@@ -1,7 +1,7 @@
 *.${DOMAIN} {
 
-	$([[ ! -f /root/.acme.sh/*.${DOMAIN}/fullchain.cer ]] && echo "#") tls internal
-	$([[ -f /root/.acme.sh/*.${DOMAIN}/fullchain.cer ]] && echo "#") tls /root/.acme.sh/*.${DOMAIN}/fullchain.cer /root/.acme.sh/*.${DOMAIN}/*.${DOMAIN}.key
+$([[ -e /etc/caddy/vmtree.crt ]] && echo "#")        tls internal
+$([[ ! -e /etc/caddy/vmtree.crt ]] && echo "#")        tls /etc/caddy/vmtree.crt /etc/caddy/vmtree.key
 
         @auth {
                 not {

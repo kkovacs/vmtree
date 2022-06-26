@@ -74,6 +74,23 @@ fi
 snap install --classic lxd
 lxd init --auto
 
+# Set up acme.sh to prpoure wildcard tls.
+# NOTE: I'm not happy that it installs under /root,
+# but it's buggy otherwise as of 2022-06-25.
+# Install acme.sh
+if [[ ! -f /root/.acme.sh/acme.sh ]]; then
+	# We don't need cron, we will do that ourselves, because we need other functionality
+	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
+fi
+# Provision certificate if not set up yet
+# (Settings come from .env)
+if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
+	/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
+fi
+# Run cron script manually,
+# this deploys acme.sh certs to Caddy
+/vmtree/cron-renew.sh
+
 # Configure Caddy
 _template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
 
@@ -123,17 +140,6 @@ _template templates/lxd-dns-lxdbr0.service /etc/systemd/system/lxd-dns-lxdbr0.se
 sudo systemctl daemon-reload
 # Start the service, now and forever
 sudo systemctl enable --now lxd-dns-lxdbr0
-
-# Set up acme.sh to prpcure wildcard tls.
-# NOTE: I'm not happy that it installs under /root,
-# but it's buggy otherwise as of 2022-06-25.
-if [[ ! -f /root/.acme.sh/acme.sh ]]; then
-	# We don't need cron, we will do that ourselves, because we need other functionality
-	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
-fi
-
-# Settings come from .env
-/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
 
 # Set up crontab
 crontab <<"EOF"
