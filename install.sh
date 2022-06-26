@@ -29,7 +29,7 @@ fi
 
 # If .env doesn't exist, initialize it
 if [[ ! -f .env ]]; then
-	_template templates/env .env
+	_template templates/env .env -m 600
 fi
 
 # Configuration
@@ -98,7 +98,7 @@ fi
 
 # Install
 if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades; do sleep 1; done;
+	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades snapd openssh-server; do sleep 1; done;
 fi
 
 ########################################
