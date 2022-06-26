@@ -2,6 +2,10 @@
 # Example: DOMAIN="example.com"
 DOMAIN="${DOMAIN}"
 
+# Automatic HTTP authentication. Password will be hashed automatically.
+AUTHUSER="${AUTHUSER}"
+AUTHPASS="${AUTHPASS}"
+
 # acme.sh DNS provider setup.
 # More info:
 # https://github.com/acmesh-official/acme.sh/wiki/dnsapi

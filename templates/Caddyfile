@@ -8,6 +8,9 @@ $([[ ! -e /etc/caddy/vmtree.crt ]] && echo "#")        tls /etc/caddy/vmtree.crt
                         host placeholder-httpnoauth.${DOMAIN}
                 }
         }
+        basicauth @auth {
+                "${AUTHUSER}" "$(echo "$AUTHPASS" | caddy hash-password)"
+        }
 
         reverse_proxy {
                 to "{http.request.host.labels.2}.lxd:80"

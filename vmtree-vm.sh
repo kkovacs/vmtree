@@ -123,11 +123,11 @@ packages:
 write_files:
 - path: /etc/motd
   content: |
-    ================== Mini-HOWTO ==================
-    Destroy this VM: ..................... sudo touch /killme
-    Make this VM survive the night: ...... sudo touch /nokill
-    Disable HTTP password protection: .... sudo touch /nopassword
-    ================================================
+    ============================ Mini-HOWTO ============================
+    Destroy this VM (~1 min): ..................... sudo touch /killme
+    Disable HTTP password protection (~1 min): .... sudo touch /nopassword
+    Make this VM survive the night: ............... sudo touch /nokill
+    ====================================================================
 #- path: /etc/docker/daemon.json
 #  content: |
 #    { "storage-driver": "overlay2" }
