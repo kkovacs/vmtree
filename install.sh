@@ -15,7 +15,7 @@ source lib.sh
 
 # Ensure root
 if [[ $EUID -ne 0 ]]; then
-	echo "Please run as root!"
+	echo "ERROR: Please run as root!"
 	exit 1
 fi
 
@@ -23,7 +23,7 @@ fi
 # We are weird like that,
 # but no, I'm not making anything configurable unless absolutely needed.
 if [[ "$(pwd)" != "/vmtree" ]]; then
-	echo "Please move everything to the /vmtree/ directory."
+	echo "ERROR: Please move everything to the /vmtree/ directory."
 	exit 1
 fi
 
@@ -37,7 +37,7 @@ source .env
 
 # Do we know our domain already? (From the .env file, usually)
 if [[ -z "$DOMAIN" ]]; then
-	echo "Please edit and fill out the .env file!"
+	echo "ERROR: Please edit and fill out the /vmtree/.env file!"
 	exit 1
 fi
 
@@ -57,15 +57,10 @@ install -o root -g root -m 750 -d /vmtree/log
 # Ensure permissions on ssh pubkeys
 # (When copied, they tend to be 600, but they are public after all,
 # and the vmtree-vm.sh script needs to read them.)
-chmod 644 keys/*
+chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."; exit 1; }
 
 # Create users with authorized_keys
 for user in keys/*; do
-	# Sanity check: are there any ssh keys?
-	if [[ "$user" == "keys/*" ]]; then
-		echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."
-		exit 1
-	fi
 	# Load ssh key
 	# Shellcheck thinks it's unused, but it's not.
 	# shellcheck disable=SC2034
@@ -177,4 +172,16 @@ crontab <<"EOF"
 EOF
 
 # Success
-echo "OK! vmtree had been set up!"
+printf "\nSUCCESS! vmtree had been set up!"
+cat <<EOF
+Now put this in your .ssh/config:
+
+Host *.wp1.pw
+        User user
+        ProxyCommand ssh dev@${DOMAIN} "%h"
+        UserKnownHostsFile /dev/null
+        StrictHostKeyChecking no
+        ForwardAgent yes
+
+You can replace "dev" with personal user names (the file names of your SSH keys in /vmtree/keys/).
+EOF
