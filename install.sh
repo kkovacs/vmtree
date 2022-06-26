@@ -1,5 +1,9 @@
 #!/bin/bash
 
+########################################
+# Basic script setup
+########################################
+
 # Strict mode
 set -ex
 # Needed for mapfile
@@ -46,56 +50,9 @@ install -o root -g root -m 755 -d /vmtree/keys
 # Ensure /vmtree/log
 install -o root -g root -m 750 -d /vmtree/log
 
-# Set up sysctl for lots of dockers
-cat >/etc/sysctl.d/99-vmtree.conf <<EOF
-kernel.keys.root_maxkeys=1000000
-kernel.keys.root_maxbytes=100000000
-kernel.keys.maxkeys=100000
-kernel.keys.maxbytes=250000000
-fs.inotify.max_user_instances=10240
-fs.inotify.max_user_watches=655360
-EOF
-# Reload sysctl
-sysctl -p
-
-# Set up Caddy repos
-if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
-	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-	until apt-get update; do sleep 1; done
-fi
-
-# Install
-if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades; do sleep 1; done;
-fi
-
-# Install LXD
-snap install --classic lxd
-lxd init --auto
-
-# Set up acme.sh to prpoure wildcard tls.
-# NOTE: I'm not happy that it installs under /root,
-# but it's buggy otherwise as of 2022-06-25.
-# Install acme.sh
-if [[ ! -f /root/.acme.sh/acme.sh ]]; then
-	# We don't need cron, we will do that ourselves, because we need other functionality
-	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
-fi
-# Provision certificate if not set up yet
-# (Settings come from .env)
-if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
-	/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
-fi
-# Run cron script manually,
-# this deploys acme.sh certs to Caddy
-/vmtree/cron-renew.sh
-
-# Configure Caddy
-_template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
-
-# Restart/reload caddy
-systemctl reload-or-restart caddy
+########################################
+# Unix users
+########################################
 
 # Ensure permissions on ssh pubkeys
 # (When copied, they tend to be 600, but they are public after all,
@@ -127,6 +84,30 @@ for user in keys/*; do
 	_template  "templates/authorized_keys" "/home/${user}/.ssh/authorized_keys" -o "${user}" -g "${user}" -m 600
 done
 
+########################################
+# Caddy reverse proxy
+########################################
+
+# Set up Caddy repos
+if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+	until apt-get update; do sleep 1; done
+fi
+
+# Install
+if [[ ! -f /usr/bin/caddy ]]; then
+	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades; do sleep 1; done;
+fi
+
+########################################
+# LXD Linux containers
+########################################
+
+# Install LXD
+snap install --classic lxd
+lxd init --auto
+
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
 # Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
@@ -141,10 +122,59 @@ sudo systemctl daemon-reload
 # Start the service, now and forever
 sudo systemctl enable --now lxd-dns-lxdbr0
 
+########################################
+# Certificates - acme.sh
+########################################
+
+# Set up acme.sh to prpoure wildcard tls.
+# NOTE: I'm not happy that it installs under /root,
+# but it's buggy otherwise as of 2022-06-25.
+# Install acme.sh
+if [[ ! -f /root/.acme.sh/acme.sh ]]; then
+	# We don't need cron, we will do that ourselves, because we need other functionality
+	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
+fi
+# Provision certificate if not set up yet
+# (Settings come from .env)
+if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
+	/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
+fi
+# Run cron script manually,
+# this deploys acme.sh certs to Caddy
+/vmtree/cron-renew.sh
+
+# Configure Caddy
+_template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
+
+# Restart/reload caddy
+systemctl reload-or-restart caddy
+
+########################################
+# Systemctl, crontab
+########################################
+
+# Set up sysctl for lots of dockers
+cat >/etc/sysctl.d/99-vmtree.conf <<EOF
+kernel.keys.root_maxkeys=1000000
+kernel.keys.root_maxbytes=100000000
+kernel.keys.maxkeys=100000
+kernel.keys.maxbytes=250000000
+fs.inotify.max_user_instances=10240
+fs.inotify.max_user_watches=655360
+EOF
+# Reload sysctl
+sysctl -p
+
 # Set up crontab
+# Leave this to last,
+# so "every minute" scripts dont' run before things are set up,
+# causing unnecessary errors.
 crontab <<"EOF"
 0 6 * * * /vmtree/cron-stop.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-killme.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
 9 0 * * * /vmtree/cron-renew.sh
 EOF
+
+# Success
+echo "OK! vmtree had been set up!"
