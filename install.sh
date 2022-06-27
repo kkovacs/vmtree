@@ -196,7 +196,7 @@ printf "\nSUCCESS! vmtree had been set up!"
 cat <<EOF
 Now put this in your .ssh/config:
 
-Host *.wp1.pw
+Host *.${DOMAIN}
         User user
         ProxyCommand ssh vmtree@${DOMAIN} "%h"
         UserKnownHostsFile /dev/null
