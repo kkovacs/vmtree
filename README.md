@@ -11,7 +11,7 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 - Devs can start up new VMs just by SSH-ing into them.
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
 - There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `username-`.)
-- Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A reverse-proxy deals with TLS and forwards HTTP requests to the right VM.)
+- Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A [reverse-proxy](https://caddyserver.com/v2) deals with TLS and forwards HTTP requests to the right VM.)
 - A HTTP password protects every subdomain automatically, so forgetful humans don't accidentally expose random things to the world. (This can be easily disabled on a per-VM basis.)
 - The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer easy.)
 - VMs are considered ephemeral: by default all VMs "die" at 6am. (This protects resources from forgetful humans.)
