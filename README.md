@@ -4,20 +4,20 @@ This is a collection of scripts that turn a server into a "VM tree", on which yo
 
 The way to procure a new VM is just to SSH into it. SSH-ing to a new one creates it.
 
-Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just grow on the 🌳VMTREE for easy picking.
+Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
 ## Features
 
-- Developers can start up new VMs just by SSH-ing. (`ssh dev-foo.example.com` starts up a fresh VM called `dev-foo` and connects to it.)
+- Devs can start up new VMs just by SSH-ing. (`ssh dev-foo.example.com` starts up a fresh VM called `dev-foo` and connects to it.)
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
-- There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `yourusername-`.)
-- Port 80 of every VM is publicly accessible over HTTPS, like `https://dev-foo.example.com`. (A reverse-proxy deals with TLS and forwards HTTP requests to the right VM.)
-- A mount in `/persist/` is shared between your personal VMs. (This makes file transfer easy.)
+- There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `username-`.)
+- Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A reverse-proxy deals with TLS and forwards HTTP requests to the right VM.)
+- The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer easy.)
 - VMs are considered ephemeral: by default all VMs "die" at 6am. (This protects resources from forgetful humans.)
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
 - Some VMs can easily be marked to be "spared" from the 6am killing.
+- A HTTP password protects every subdomain automatically, so forgetful humans don't accidentally publish random things to the world. (This can easily be disabled on a per-VM basis.)
 - LXD containers are automatically configured so `docker` can run in them.
-- By default a HTTP password protects every subdomain, so forgetful humans don't accidentally publish random things to the world. (This can easily be disabled on a per-VM basis.)
 
 ## Installation (basic)
 
