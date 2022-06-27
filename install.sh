@@ -29,7 +29,7 @@ fi
 
 # If .env doesn't exist, initialize it
 if [[ ! -f .env ]]; then
-	_template templates/env .env -m 644
+	_template templates/env .env -m 640
 fi
 
 # Configuration
@@ -153,6 +153,10 @@ systemctl reload-or-restart caddy
 ########################################
 # Systemctl, crontab
 ########################################
+
+# Protect .env file a bit better
+chown root:vmtree /vmtree/.env
+chmod 640 /vmtree/.env
 
 # Set up sysctl for lots of dockers
 cat >/etc/sysctl.d/99-vmtree.conf <<EOF
