@@ -191,11 +191,11 @@ sysctl -p
 # Leave this to last,
 # so "every minute" scripts dont' run before things are set up,
 # causing unnecessary errors.
-crontab <<"EOF"
+crontab <<EOF
 0 6 * * * /vmtree/cron-stop.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-killme.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
-9 0 * * * /vmtree/cron-renew.sh
+$([[ $ACME_DNS == "selfsigned" ]] && echo "#")9 0 * * * /vmtree/cron-renew.sh
 EOF
 
 # Success
