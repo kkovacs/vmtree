@@ -29,7 +29,7 @@ fi
 
 # If .env doesn't exist, initialize it
 if [[ ! -f .env ]]; then
-	_template templates/env .env -m 600
+	_template templates/env .env -m 644
 fi
 
 # Configuration
