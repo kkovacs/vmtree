@@ -13,6 +13,6 @@ $([[ $ACME_DNS != "selfsigned" ]] || echo "#")        tls /etc/caddy/vmtree.crt 
         }
 
         reverse_proxy {
-                to "{http.request.host.labels.2}.lxd:80"
+                to "{http.request.host.labels.$(echo ${DOMAIN//[!.]/} | wc -c)}.lxd:80"
         }
 }

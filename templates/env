@@ -1,6 +1,6 @@
 # The main domain that points here. No http/https, no trailing dot.
 # Example: DOMAIN="example.com"
-DOMAIN="${DOMAIN}"
+DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 
 # Automatic HTTP authentication. Password will be hashed automatically.
 AUTHUSER="${AUTHUSER:-vmtree}"
