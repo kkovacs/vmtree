@@ -18,7 +18,7 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
 - Some VMs can easily be marked to be "spared" from the 6am killing.
 - LXD containers are automatically configured to be `docker`-capable.
-- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh dev-foo-centos8.example.com` (Then on you can use just `dev-foo`.)
+- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh dev-foo-centos8.example.com` (Then on you can use just `dev-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the owner.
 - EXPERIMENTAL: Using LXD's "real VMs" running on QEMU, as opposed to containers. (For now, not all features work with such VMs.)
 
@@ -29,13 +29,13 @@ sudo git clone https://github.com/kkovacs/vmtree.git /vmtree
 sudo /vmtree/install.sh
 ```
 
-Then put the snippet it prints to your `.ssh/config` file.
+Then put the snippet it prints out in your `.ssh/config` file.
 
 ## Installation (full featured with valid wildcard certificate)
 
 1. Get a domain that you will use for VMTREE. (From now on: `example.com`).
-1. Host the domain on a provider supported by [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). (Needed for the wildcard TLS certificate.)
-1. Get a powerful host server that you will use for VMTREE, running Ubuntu 22.04 (Ubuntu 20.04 also works for now).
+1. Host the domain on a DNS provider [supported by acme.sh](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). (Needed for the wildcard TLS certificate.)
+1. Get a powerful host server that you will use for VMTREE, running Ubuntu 22.04 or 20.04.
 1. Configure DNS so `example.com` and `*.example.com` point to the host server's IP. (Wait until it propagates.)
 1. On your host server, `sudo git clone https://github.com/kkovacs/vmtree.git /vmtree`
 1. Copy your and your teams's SSH public keys (`authorized_keys` files) to `/vmtree/keys/<username>` files.
