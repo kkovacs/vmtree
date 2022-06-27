@@ -3,8 +3,8 @@
 DOMAIN="${DOMAIN}"
 
 # Automatic HTTP authentication. Password will be hashed automatically.
-AUTHUSER="${AUTHUSER}"
-AUTHPASS="${AUTHPASS}"
+AUTHUSER="${AUTHUSER:-vmtree}"
+AUTHPASS="${AUTHPASS:-$RANDOM}"
 
 # Default LXD image
 # If you leave it commented, it will use the default from the script,
@@ -17,7 +17,8 @@ AUTHPASS="${AUTHPASS}"
 # https://github.com/acmesh-official/acme.sh/wiki/dnsapi
 #
 # Parameter to give to "--dns" for acme.sh
-ACME_DNS="${ACME_DNS:-dns_dgon}"
+# NOTE! You can use "selfsigned" here, then acme.sh won't be used.
+ACME_DNS="${ACME_DNS:-selfsigned}"
 # Provider-specific variables:
-# (Need to be exported so acme.sh picks it up)
-export DO_API_KEY="${DO_API_KEY}"
+# (Needs to be exported so acme.sh picks it up)
+#export DO_API_KEY="${DO_API_KEY}"

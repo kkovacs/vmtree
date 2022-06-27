@@ -1,7 +1,7 @@
 *.${DOMAIN} {
 
-$([[ -e /etc/caddy/vmtree.crt ]] && echo "#")        tls internal
-$([[ ! -e /etc/caddy/vmtree.crt ]] && echo "#")        tls /etc/caddy/vmtree.crt /etc/caddy/vmtree.key
+$([[ $ACME_DNS == "selfsigned" ]] || echo "#")        tls internal
+$([[ $ACME_DNS != "selfsigned" ]] || echo "#")        tls /etc/caddy/vmtree.crt /etc/caddy/vmtree.key
 
         @auth {
                 not {

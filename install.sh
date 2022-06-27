@@ -19,6 +19,13 @@ if [[ $EUID -ne 0 ]]; then
 	exit 1
 fi
 
+# Ensure correct host OS
+source /etc/os-release
+if [[ "$VERSION_ID" != "20.04" && "$VERSION_ID" != "22.04" ]]; then
+	echo "ERROR: Please install on Ubuntu 20.04 or 22.04!"
+	exit 1
+fi
+
 # Check if we are at the right place.
 # We are weird like that,
 # but no, I'm not making anything configurable unless absolutely needed.
@@ -127,22 +134,25 @@ sudo systemctl enable --now lxd-dns-lxdbr0
 # Certificates - acme.sh
 ########################################
 
-# Set up acme.sh to prpoure wildcard tls.
-# NOTE: I'm not happy that it installs under /root,
-# but it's buggy otherwise as of 2022-06-25.
-# Install acme.sh
-if [[ ! -f /root/.acme.sh/acme.sh ]]; then
-	# We don't need cron, we will do that ourselves, because we need other functionality
-	curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
+# Set up acme.sh to prpoure wildcard tls,
+# except if using a self-signed certificate.
+if [[ "$ACME_DNS" != "selfsigned" ]]; then
+	# NOTE: I'm not happy that it installs under /root,
+	# but it's buggy otherwise as of 2022-06-25.
+	# Install acme.sh
+	if [[ ! -f /root/.acme.sh/acme.sh ]]; then
+		# We don't need cron, we will do that ourselves, because we need other functionality
+		curl https://raw.githubusercontent.com/acmesh-official/acme.sh/master/acme.sh | sh -s -- --install-online --nocron -m "dnsadmin@$DOMAIN"
+	fi
+	# Provision certificate if not set up yet
+	# (Settings come from .env)
+	if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
+		/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
+	fi
+	# Run cron script manually,
+	# this deploys acme.sh certs to Caddy
+	/vmtree/cron-renew.sh
 fi
-# Provision certificate if not set up yet
-# (Settings come from .env)
-if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
-	/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
-fi
-# Run cron script manually,
-# this deploys acme.sh certs to Caddy
-/vmtree/cron-renew.sh
 
 # Configure Caddy
 _template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
