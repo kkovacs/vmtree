@@ -24,6 +24,8 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 
 ## Installation (basic)
 
+On an Ubuntu 20.04 or 22.04 server with a public IP address, run:
+
 ```bash
 sudo git clone https://github.com/kkovacs/vmtree.git /vmtree
 sudo cp ~/.ssh/authorized_keys /vmtree/keys/my
@@ -31,6 +33,8 @@ sudo /vmtree/install.sh
 ```
 
 Then put the snippet it prints out in your `.ssh/config` file.
+
+This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), and a self-signed certificate to set up the possible fullest functionality without using your own domain.
 
 ## Installation (full featured with valid wildcard certificate)
 

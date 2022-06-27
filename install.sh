@@ -202,7 +202,7 @@ EOF
 printf "\nSUCCESS! vmtree had been set up!\n"
 cat <<EOF
 
-You can reach VMs' port 80 at: https://vm-name.$DOMAIN/
+You can reach VMs' port 80 at: https://my-vmname.$DOMAIN/
 With HTTP username/password: $AUTHUSER / $AUTHPASS
 
 Now put this in your .ssh/config:
@@ -213,4 +213,7 @@ Host *.${DOMAIN}
         UserKnownHostsFile /dev/null
         StrictHostKeyChecking no
         ForwardAgent yes
+
+Then just:
+ssh my-vmname.${DOMAIN}
 EOF

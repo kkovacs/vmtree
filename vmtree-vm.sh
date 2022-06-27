@@ -77,7 +77,7 @@ echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
 
 # Show info
-echo "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK" >&2
+printf "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK\n\nThis VM's port 80 is: https://$VM.$DOMAIN/ ( $AUTHUSER / $AUTHPASS )\n\n" >&2
 
 # Default lxc options
 OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
@@ -95,6 +95,7 @@ fi
 # Print infos here.
 # Maybe it gets read while the user is waiting.
 cat >&2 <templates/motd
+echo >&2 # empty line
 
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
