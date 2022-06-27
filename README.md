@@ -26,6 +26,7 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 
 ```bash
 sudo git clone https://github.com/kkovacs/vmtree.git /vmtree
+sudo cp ~/.ssh/authorized_keys /vmtree/keys/my
 sudo /vmtree/install.sh
 ```
 
@@ -39,7 +40,7 @@ Then put the snippet it prints out in your `.ssh/config` file.
 1. Configure DNS so `example.com` and `*.example.com` point to the host server's IP. (Wait until it propagates.)
 1. On your host server, `sudo git clone https://github.com/kkovacs/vmtree.git /vmtree`
 1. Copy your and your teams's SSH public keys (`authorized_keys` files) to `/vmtree/keys/<username>` files.
-1. Run `sudo /vmtree/install.sh` to do basic checks.
+1. Run `sudo /vmtree/install.sh --skip-install` to do basic checks and generate a default `/vmtree/.env` file.
 1. It will say that you need to fill out the `/vmtree/.env` file. Fill out:
    - your domain name (`example.com`)
    - your desired automatic HTTP AUTH username / password

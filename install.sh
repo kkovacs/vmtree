@@ -48,6 +48,13 @@ if [[ -z "$DOMAIN" ]]; then
 	exit 1
 fi
 
+# Give an option to just do the previous checks and generate the initial .env file.
+if [[ " $* " == *" --skip-install "* ]]; then
+	echo "CHECKS COMPLETE: Now please edit and fill out the /vmtree/.env file, then run $0 again!"
+	exit 0
+fi
+
+
 # Ensure /vmtree
 install -o root -g root -m 755 -d /vmtree
 # Ensure /vmtree/disks
@@ -192,8 +199,12 @@ crontab <<"EOF"
 EOF
 
 # Success
-printf "\nSUCCESS! vmtree had been set up!"
+printf "\nSUCCESS! vmtree had been set up!\n"
 cat <<EOF
+
+You can reach VMs' port 80 at: https://vm-name.$DOMAIN/
+With HTTP username/password: $AUTHUSER / $AUTHPASS
+
 Now put this in your .ssh/config:
 
 Host *.${DOMAIN}
