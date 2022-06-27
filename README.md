@@ -2,13 +2,13 @@
 
 This is a collection of scripts that turn a server into a "VM tree", on which you can start up (and delete) ephemeral [LXD containers](https://linuxcontainers.org/lxd/) -- basically VMs.
 
-The way to procure a new VM is just to SSH into it. SSH-ing to a new one creates it.
+The way to procure a new VM is just to SSH into it. `ssh dev-foo.example.com` starts up a fresh VM called `dev-foo` and connects to it. `sudo touch /killme` destroys it.
 
 Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
 ## Features
 
-- Devs can start up new VMs just by SSH-ing. (`ssh dev-foo.example.com` starts up a fresh VM called `dev-foo` and connects to it.)
+- Devs can start up new VMs just by SSH-ing into them.
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
 - There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `username-`.)
 - Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A reverse-proxy deals with TLS and forwards HTTP requests to the right VM.)
