@@ -14,9 +14,13 @@ SSHUSER="$1"
 shift
 
 # Strip VM name of domain, then split on "-"
+# XXX Should be a better way of splitting that doesn't mess with IFS
+SAVEIFS="$IFS"
 # Shellcheck thinks we don't want splitting, but we do.
 # shellcheck disable=SC2206
 IFS="-" PARTS=( ${1%%.*} )
+IFS="$SAVEIFS"
+unset SAVEIFS
 
 # Sanity check
 if [[ ${#PARTS[@]} -lt 2 ]]; then
