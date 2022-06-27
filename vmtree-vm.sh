@@ -27,7 +27,7 @@ fi
 # Friendlier variable
 REQUSER="${PARTS[0]}"
 REQVM="${PARTS[1]}"
-REQIMAGE="${PARTS[2]:-ubuntu2204}"
+REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2204}}"
 REQETC="${PARTS[3]}"
 # Force "prefix-" to VM, but let anyone use "dev"
 VMUSER="$REQUSER"

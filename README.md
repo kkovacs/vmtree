@@ -17,8 +17,8 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 - VMs are considered ephemeral: by default all VMs "die" at 6am. (This protects resources from forgetful humans.)
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
 - Some VMs can easily be marked to be "spared" from the 6am killing.
-- LXD containers are automatically configured so `docker` can run in them.
-- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM with `ssh dev-foo-centos8.example.com`
+- LXD containers are automatically configured to be `docker`-capable.
+- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh dev-foo-centos8.example.com` (Then on you can use just `dev-foo`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the owner.
 - EXPERIMENTAL: Using LXD's "real VMs" running on QEMU, as opposed to containers. (For now, not all features work with such VMs.)
 
