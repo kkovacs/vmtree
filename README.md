@@ -18,6 +18,7 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
 - Some VMs can easily be marked to be "spared" from the 6am killing.
 - LXD containers are automatically configured so `docker` can run in them.
+- By default VMs are running Ubuntu 22.04, but devs can request different OSes just by procuring the VM with `ssh dev-foo-centos8.example.com`
 
 ## Installation (basic)
 
@@ -32,7 +33,7 @@ Then put the snippet it prints to your `.ssh/config` file.
 
 1. Get a domain that you will use for VMTREE. (From now on: `example.com`).
 1. Host the domain on a provider supported by [acme.sh](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). (Needed for the wildcard TLS certificate.)
-1. Get a powerful host server that you will use for VMTREE.
+1. Get a powerful host server that you will use for VMTREE, running Ubuntu 22.04 (Ubuntu 20.04 also works for now).
 1. Configure DNS so `example.com` and `*.example.com` point to the host server's IP. (Wait until it propagates.)
 1. On your host server, `sudo git clone https://github.com/kkovacs/vmtree.git /vmtree`
 1. Copy your and your teams's SSH public keys (`authorized_keys` files) to `/vmtree/keys/<username>` files.
