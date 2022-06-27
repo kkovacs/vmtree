@@ -12,15 +12,15 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
 - There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `username-`.)
 - Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A reverse-proxy deals with TLS and forwards HTTP requests to the right VM.)
-- A HTTP password protects every subdomain automatically, so forgetful humans don't accidentally publish random things to the world. (This can easily be disabled on a per-VM basis.)
+- A HTTP password protects every subdomain automatically, so forgetful humans don't accidentally expose random things to the world. (This can be easily disabled on a per-VM basis.)
 - The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer easy.)
 - VMs are considered ephemeral: by default all VMs "die" at 6am. (This protects resources from forgetful humans.)
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
-- Some VMs can easily be marked to be "spared" from the 6am killing.
+- Some VMs can easily be marked to be "spared" from the 6am killing. (`sudo touch /nokill`)
 - LXD containers are automatically configured to be `docker`-capable.
 - By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh dev-foo-centos8.example.com` (Then on you can use just `dev-foo.example.com`.)
-- Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the owner.
-- EXPERIMENTAL: Using LXD's "real VMs" running on QEMU, as opposed to containers. (For now, not all features work with such VMs.)
+- Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
+- EXPERIMENTAL: Using LXD's "real VMs" running on QEMU, as opposed to containers. (Not all features work with QEMU VMs, but they are real VMs. You can even install K8s on them.)
 
 ## Installation (basic)
 
