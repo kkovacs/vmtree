@@ -32,9 +32,9 @@ sudo cp ~/.ssh/authorized_keys /vmtree/keys/my
 sudo /vmtree/install.sh
 ```
 
-Then put the snippet it prints out in your `.ssh/config` file.
+Then put the snippet it prints out in your `.ssh/config` file (on your PC, not on the server, of course).
 
-This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), and a self-signed certificate to set up the possible fullest functionality without using your own domain.
+This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), and a self-signed certificate to set up the fullest possible functionality without using your own domain.
 
 ## Installation (full featured with valid wildcard certificate)
 
