@@ -70,6 +70,7 @@ images["centos9"]="images:centos/9-Stream/cloud"   # Works, not thoroughly teste
 images["debian11"]="images:debian/11/cloud"        # First connect never works, SSH install takes time
 images["debian12"]="images:debian/12/cloud"        # First connect never works, SSH install takes time
 images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly tested
+images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly tested
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # No SSH running
