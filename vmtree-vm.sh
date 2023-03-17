@@ -71,6 +71,8 @@ images["debian11"]="images:debian/11/cloud"        # First connect never works, 
 images["debian12"]="images:debian/12/cloud"        # First connect never works, SSH install takes time
 images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly tested
 images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly tested
+images["suse"]="images:opensuse/tumbleweed/cloud"  # Works, not thoroughly tested
+images["suse154"]="images:opensuse/15.4/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # No SSH running
