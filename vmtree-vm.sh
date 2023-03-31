@@ -90,7 +90,7 @@ OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_
 # XXX No way to "killme" it, no way to "nokill" it, no way to "nopassword", etc
 if [[ "$REQETC" == "vm" ]]; then
 	# This changes EVERYTHING (in OPTS)
-	OPTS=( "--vm" )
+	OPTS=( "--vm" "-c" "limits.cpu=2" "-c" "limits.memory=2GiB" )
 	# Set REAL VMs ephemeral for now, as an alternative way to kill it on demand.
 	OPTS+=( "-e" )
 fi
