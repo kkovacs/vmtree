@@ -88,11 +88,17 @@ OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_
 # REAL VM (as opposed to container) mode
 # XXX EXPERIMENTAL!
 # XXX No way to "killme" it, no way to "nokill" it, no way to "nopassword", etc
-if [[ "$REQETC" == "vm" ]]; then
+if [[ "$REQETC" = "vm"* ]]; then
 	# This changes EVERYTHING (in OPTS)
-	OPTS=( "--vm" "-c" "limits.cpu=2" "-c" "limits.memory=2GiB" )
+	OPTS=( "--vm")
 	# Set REAL VMs ephemeral for now, as an alternative way to kill it on demand.
 	OPTS+=( "-e" )
+	# Set limits, if given. Enforce format
+	LIMIT="${REQETC#vm}"
+	# Allow only ONE DIGIT (and only a digit, preventing overuse and injection)
+	if [[ "$LIMIT" =~ ^[0-9]$ ]]; then
+		OPTS+=( "-c" "limits.cpu=2" "-c" "limits.memory=${LIMIT}GiB" )
+	fi
 fi
 
 # Print infos here.
