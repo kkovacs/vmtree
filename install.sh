@@ -119,9 +119,15 @@ fi
 # LXD Linux containers
 ########################################
 
-# Install LXD
-snap install --classic lxd
-lxd init --auto
+# Install LXD if not installed
+if ! type lxd; then
+	snap install --classic lxd
+fi
+
+# Initialize lxd only if not initialized
+if ! lxc storage show default; then
+	lxd init --auto
+fi
 
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
