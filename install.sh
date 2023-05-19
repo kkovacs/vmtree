@@ -13,6 +13,9 @@ cd "$(dirname "$0")" || exit
 # Load helper functions
 source lib.sh
 
+# Prevent ubuntu "restart" dialog
+export DEBIAN_FRONTEND=noninteractive
+
 # Ensure root
 if [[ $EUID -ne 0 ]]; then
 	echo "ERROR: Please run as root!"
