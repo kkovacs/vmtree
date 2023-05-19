@@ -10,13 +10,9 @@ source .env
 export PATH="$PATH:/snap/bin"
 
 # Find marker file
-for a in /var/snap/lxd/common/lxd/storage-pools/default/containers/*/rootfs/killme; do
-	VM="$(echo "$a" | awk -F/ '{print $10}')";
-	# Safety so we don't kill ALL VMs when there is no "killme" file and awk returns "*"
-	if [ "$VM" == "*" ]; then
-		#echo "Not killing ALL"
-		break;
+for VM in $(lxc list --format csv --columns n ); do
+	if lxc file pull "$VM/killme" - 2>/dev/null ; then
+		echo "Killme deleting $VM";
+		lxc delete -f "$VM"
 	fi
-	echo "Killme deleting $VM";
- 	lxc delete -f "$VM"
 done

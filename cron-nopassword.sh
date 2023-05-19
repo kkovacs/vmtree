@@ -19,13 +19,10 @@ CHECKSUM1=$(sha256sum "$FILE" | awk '{print $1}')
 echo "[\"placeholder-httpnoauth.${DOMAIN}\"" >"$FILE"
 
 # Find marker file
-for a in /var/snap/lxd/common/lxd/storage-pools/default/containers/*/rootfs/nopassword; do
-	VM="$(echo "$a" | awk -F/ '{print $10}')";
-	# Safety when no files at all
-	if [ "$VM" == "*" ]; then
-		break;
+for VM in $(lxc list --format csv --columns n ); do
+	if lxc file pull "$VM/nopassword" - 2>/dev/null ; then
+		echo ",\"${VM}.${DOMAIN}\"" >>"$FILE"
 	fi
-	echo ",\"${VM}.${DOMAIN}\"" >>"$FILE"
 done
 
 # Footer
