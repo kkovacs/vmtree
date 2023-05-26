@@ -2,7 +2,7 @@
 
 This is a collection of scripts that turn a server into a "VM tree", on which you can start up (and delete) ephemeral [LXD containers](https://linuxcontainers.org/lxd/) -- basically VMs.
 
-The way to procure a new VM is just to SSH into it. `ssh dev-foo.example.com` starts up a fresh VM called `dev-foo` and connects to it. `sudo touch /killme` destroys it.
+The way to procure a new VM is just to SSH into it. `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. `sudo touch /killme` destroys it.
 
 Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
@@ -10,15 +10,15 @@ Our dev(ops) team has been using it for years, and we ❤️ that fresh VMs just
 
 - Devs can start up new VMs just by SSH-ing into them.
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
-- There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `dev-`. Personal ones with `username-`.)
-- Port 80 of every VM is automatically accessible over HTTPS, like `https://dev-foo.example.com`. (A [reverse-proxy](https://caddyserver.com/v2) deals with TLS and forwards HTTP requests to the right VM.)
+- There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `demo-`. Personal ones with `username-`.)
+- Port 80 of every VM is automatically accessible over HTTPS, like `https://demo-foo.example.com`. (A [reverse-proxy](https://caddyserver.com/v2) deals with TLS and forwards HTTP requests to the right VM.)
 - Every subdomain is protected with HTTP password automatically, so forgetful humans don't accidentally expose random things to the world. (Can be disabled on a per-VM basis by `sudo touch /nopassword`.)
 - The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer easy.)
 - VMs are considered ephemeral: by default all VMs "die" at 6am. (This protects resources from forgetful humans.)
 - But files in `/persist/` are persistent and survive the 6am killing of VMs. (So it's recommended to keep your work there.)
 - Some VMs can easily be marked to be "spared" from the 6am killing. (`sudo touch /nokill`)
 - LXD containers are automatically configured to be `docker`-capable.
-- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh dev-foo-centos8.example.com` (Then on you can use just `dev-foo.example.com`.)
+- By default VMs are running Ubuntu 22.04, but you can request different OSes just by procuring the VM like this: `ssh demo-foo-centos8.example.com` (Then on you can use just `demo-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
 - EXPERIMENTAL: Using LXD's "real VMs" running on QEMU, as opposed to containers. (Not all features work with QEMU VMs, but they are real VMs. You can even install K8s on them.)
 

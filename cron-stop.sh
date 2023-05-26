@@ -22,8 +22,8 @@ for VM in $(lxc list --format csv --columns n ); do
 		echo "Deleting $VM" >>"$LOGFILE"
 		lxc delete -f "$VM"
 	else
-		# If it is a "nokill" VM but personal, still stop it. But leave dev-VMs running.
-		if [[ "${VM%-*}" == "dev" ]]; then
+		# If it is a "nokill" VM but personal, still stop it. But leave demo-VMs running.
+		if [[ "${VM%-*}" == "demo" ]]; then
 			echo "No-kill: $VM" >>"$LOGFILE"
 		else
 			echo "Stopping $VM" >>"$LOGFILE"

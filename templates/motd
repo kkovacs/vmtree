@@ -1,9 +1,7 @@
-====================================== N E W S ======================================
-On this new VMTREE, some things are different from the old one:
-- All VMs die at night by DEFAULT. Even "dev-xxx" VMs.
+==================================== KILL POLICY ====================================
+- All VMs get deleted at night by DEFAULT. (Even "demo-xxx" VMs.)
 - BUT! YOU CAN make any VM survive the night by running: "sudo touch /nokill"
-  - "nokill"-ed "dev-xxx" VMs will keep running (don't power down).
-  - "nokill"-ed "personal" VMs will POWER DOWN at night, but DON'T get deleted.
-- Running "sudo poweroff" to destroy a VM doesn't work anymore. Use "sudo touch /killme"
-- People can ssh into each other's VMs IF the VM's owner puts in the ssh key.
+  - "nokill"-ed "demo-xxx" VMs will keep running (don't power down).
+  - "nokill"-ed "personal" VMs WILL POWER DOWN at night, but DON'T get deleted.
+- To destroy a VM manually, run: "sudo touch /killme", and wait a minute.
 =====================================================================================

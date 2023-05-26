@@ -24,7 +24,7 @@ unset SAVEIFS
 
 # Sanity check
 if [[ ${#PARTS[@]} -lt 2 ]]; then
-	echo "ERROR: Please use the format: $SSHUSER-vmname.$DOMAIN or dev-vmname.$DOMAIN" >&2
+	echo "ERROR: Please use the format: $SSHUSER-vmname.$DOMAIN or demo-vmname.$DOMAIN" >&2
 	exit 1
 fi
 
@@ -33,14 +33,14 @@ REQUSER="${PARTS[0]}"
 REQVM="${PARTS[1]}"
 REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2204}}"
 REQETC="${PARTS[3]}"
-# Force "prefix-" to VM, but let anyone use "dev"
+# Force "prefix-" to VM, but let anyone use "demo"
 VMUSER="$REQUSER"
-if [[ "$REQUSER" == "dev" ]]; then
+if [[ "$REQUSER" == "demo" ]]; then
 	# Load ALL keys
 	cat /vmtree/keys/* | mapfile -t PUBKEYS
-	# Force VMUSER to "dev"
-	DISK="dev"
-	VMUSER="dev"
+	# Force VMUSER to "demo"
+	DISK="demo"
+	VMUSER="demo"
 else
 	# Load ONLY SSHUSER's key(s)
 	mapfile -t PUBKEYS <"/vmtree/keys/$SSHUSER"
@@ -106,8 +106,8 @@ echo >&2 # empty line
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
 	# Sanity check
-	if [[ "$VMUSER" != "$SSHUSER" && "$VMUSER" != "dev" ]]; then
-		echo "ERROR: you can only start VMs called $SSHUSER-xxx and dev-xxx" >&2
+	if [[ "$VMUSER" != "$SSHUSER" && "$VMUSER" != "demo" ]]; then
+		echo "ERROR: you can only start VMs called $SSHUSER-xxx and demo-xxx" >&2
 		exit 1
 	fi
 	# launch docker-capable vm
