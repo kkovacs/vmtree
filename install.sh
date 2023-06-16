@@ -162,7 +162,7 @@ if [[ "$ACME_DNS" != "selfsigned" ]]; then
 	fi
 	# Provision certificate if not set up yet
 	# (Settings come from .env)
-	if [[ ! -f "/root/.acme.sh/$DOMAIN/fullchain.cer" ]]; then
+	if ! compgen -G /root/.acme.sh/"$DOMAIN"*/fullchain.cer; then
 		/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
 	fi
 	# Run cron script manually,
