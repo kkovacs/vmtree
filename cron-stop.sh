@@ -16,7 +16,7 @@ free -m >>"$LOGFILE"
 df -m | grep -v 'snap\|tmpfs\|udev' >>"$LOGFILE"
 
 # Stop/kill personal VMs
-for VM in $(lxc list --format csv --columns n ); do
+for VM in $(lxc list --format csv --columns n | grep -- -); do
 	if ! lxc file pull "$VM/nokill" - 2>/dev/null ; then
 		# Every VM (without protection) is considered ephemeral, destroy them.
 		echo "Deleting $VM" >>"$LOGFILE"
