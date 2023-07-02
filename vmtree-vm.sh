@@ -22,40 +22,39 @@ IFS="-" PARTS=( ${1%%.*} )
 IFS="$SAVEIFS"
 unset SAVEIFS
 
-# Sanity check
-if [[ ${#PARTS[@]} -lt 2 ]]; then
-	echo "ERROR: Please use the format: $SSHUSER-vmname.$DOMAIN or demo-vmname.$DOMAIN" >&2
-	exit 1
-fi
-
-# Friendlier variable
-REQUSER="${PARTS[0]}"
-REQVM="${PARTS[1]}"
-REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2204}}"
-REQETC="${PARTS[3]}"
-# Force "prefix-" to VM, but let anyone use "demo"
-VMUSER="$REQUSER"
-if [[ "$REQUSER" == "demo" ]]; then
-	# Load ALL keys
-	cat /vmtree/keys/* | mapfile -t PUBKEYS
-	# Force VMUSER to "demo"
-	DISK="demo"
-	VMUSER="demo"
+# One word vmname or more?
+if [[ ${#PARTS[@]} -eq 1 ]]; then
+	# One word vm name is a special case. We never try to launch it, just connect -- if the SSH key is in.
+	REQUSER=""
+	REQVM="${PARTS[0]}"
+	REQIMAGE=""
+	REQETC=""
+	VM="$REQVM"
+	DISKPATH="/dev/null" # Won't count since we never launch, but anyway
 else
-	# Load ONLY SSHUSER's key(s)
-	mapfile -t PUBKEYS <"/vmtree/keys/$SSHUSER"
-	DISK="$SSHUSER"
-	# NOTE: If you uncomment this,
-	# then people won't be able to SSH into each other's VMs,
-	# even if their key was put into the other's VM.
-	# VMUSER="$SSHUSER"
-fi
-# Build final physical variables
-VM="$VMUSER-$REQVM"
-DISKPATH="/vmtree/disks/$DISK"
+	# Friendlier variable
+	REQUSER="${PARTS[0]}"
+	REQVM="${PARTS[1]}"
+	REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2204}}"
+	REQETC="${PARTS[3]}"
+	# Force "prefix-" to VM, but let anyone use "demo"
+	if [[ "$REQUSER" == "demo" ]]; then
+		# Load ALL keys
+		cat /vmtree/keys/* | mapfile -t PUBKEYS
+		# Force DISK to "demo"
+		DISK="demo"
+	else
+		# Load ONLY SSHUSER's key(s)
+		mapfile -t PUBKEYS <"/vmtree/keys/$SSHUSER"
+		DISK="$SSHUSER"
+	fi
+	# Build final physical variables
+	VM="$REQUSER-$REQVM"
+	DISKPATH="/vmtree/disks/$DISK"
 
-echo "Just FYI - you have the following VMs here:" >&2
-lxc list -c nst4,image.release,mcl "^${VMUSER}-" >&2
+	echo "Just FYI - you have the following VMs here:" >&2
+	lxc list -c nst4,image.release,mcl "^${REQUSER}-" >&2
+fi
 
 # Images
 declare -A images
@@ -106,7 +105,7 @@ echo >&2 # empty line
 # Does the VM exists?
 if ! lxc info "$VM" >/dev/null 2>&1 ; then
 	# Sanity check
-	if [[ "$VMUSER" != "$SSHUSER" && "$VMUSER" != "demo" ]]; then
+	if [[ "$REQUSER" != "$SSHUSER" && "$REQUSER" != "demo" ]]; then
 		echo "ERROR: you can only start VMs called $SSHUSER-xxx and demo-xxx" >&2
 		exit 1
 	fi
