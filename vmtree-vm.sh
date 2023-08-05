@@ -25,12 +25,14 @@ unset SAVEIFS
 # One word vmname or more?
 if [[ ${#PARTS[@]} -eq 1 ]]; then
 	# One word vm name is a special case. We never try to launch it, just connect -- if the SSH key is in.
+	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `lxc rename`.
 	REQUSER=""
 	REQVM="${PARTS[0]}"
-	REQIMAGE=""
+	REQIMAGE="${DEFAULTIMAGE:-ubuntu2204}"
 	REQETC=""
 	VM="$REQVM"
 	DISKPATH="/dev/null" # Won't count since we never launch, but anyway
+	printf "Trying to connect you directly to \"$REQVM\"...\n\n" >&2
 else
 	# Friendlier variable
 	REQUSER="${PARTS[0]}"
