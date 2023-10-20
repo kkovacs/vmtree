@@ -181,7 +181,7 @@ IPS="$(lxc list --format csv -c 4 "^${VM}$")"
 until [[ "${#IPS}" -gt 1 ]]; do
 	IPS="$(lxc list --format csv -c 4 "^${VM}$")"
 	if [[ "${#IPS}" -gt 1 ]]; then
-		sleep 5 # XXX Wait for SSH to start
+		sleep 10 # XXX Wait for SSH to start
 		break;
 	fi
 	echo -n "." >&2
