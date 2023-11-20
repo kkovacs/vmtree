@@ -171,22 +171,15 @@ fi
 echo "Starting" >&2
 lxc start "$VM" >/dev/null >&2
 
-# Wait for IP
-# NOTE: The reason for the double test is that if it's an OLD vm,
-# then SSH is probably already running, no need to wait even a litte.
-# On the other hand, if it's a NEW vm,
-# then ssh needs some time to generate keys and start.
-echo -n "Getting IP" >&2
-IPS="$(lxc list --format csv -c 4 "^${VM}$")"
-until [[ "${#IPS}" -gt 1 ]]; do
-	IPS="$(lxc list --format csv -c 4 "^${VM}$")"
-	if [[ "${#IPS}" -gt 1 ]]; then
-		sleep 10 # XXX Wait for SSH to start
-		break;
-	fi
-	echo -n "." >&2
-	sleep 1
+# Waiting for IP, for SSH port to open, and for '/run/nologin' to go away
+echo -n "Waiting for ready" >&2
+until (echo >"/dev/tcp/$VM.lxd/22") 2>/dev/null && ! lxc file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
+        echo -n "." >&2
+        sleep 1
 done
+
+# Display IP
+IPS="$(lxc list --format csv -c 4 "^${VM}$")"
 echo " IPs: $IPS" >&2
 
 # stdio fwd
