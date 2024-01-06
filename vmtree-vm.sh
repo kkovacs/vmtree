@@ -77,7 +77,7 @@ images["suse154"]="images:opensuse/15.4/cloud"     # Works, not thoroughly teste
 images["suse155"]="images:opensuse/15.5/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
-#images["alpine"]="images:alpine/edge/cloud"       # No SSH running
+#images["alpine"]="images:alpine/edge/cloud"       # Needs manual enable of user account and shell change
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
 
