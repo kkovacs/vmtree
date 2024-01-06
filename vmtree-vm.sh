@@ -74,6 +74,7 @@ images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly teste
 images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly tested
 images["suse"]="images:opensuse/tumbleweed/cloud"  # Works, not thoroughly tested
 images["suse154"]="images:opensuse/15.4/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
+images["suse155"]="images:opensuse/15.5/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # No SSH running
