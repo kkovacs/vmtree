@@ -29,7 +29,7 @@ It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://d
 
 - You install this an an Ubuntu server, and put a small snippet in your `.ssh/config`. (And your team members'.)
 - When you SSH to a 🌳VMTREE VM, your SSH client resolves the VM name you requested to the same server, because of the wildcard DNS domain.
-- Your `.ssh/config` snippet specifies to use a "jump" user called `vmtree` on the server. (Only the people who have their SSH key in this `vmtree` user's `authorized_keys` file can connect, of course.)
+- Your `.ssh/config` snippet specifies to use a "jump" user called `vmtree` on the server. (Only the people who have their SSH key in the `vmtree` user's `authorized_keys` file can connect, of course.)
 - The `vmtree` user's `authorized_keys` file force-runs the `/vmtree/vmtree.sh` script on the server. (It's not possible to run anything else via SSH with this user.)
 - The SSH snippet in your `.ssh/config` passes name of the VM you requested to the `/vmtree/vmtree.sh` script.
 - The `/vmtree/vmtree.sh` script does security checks regarding naming convention, etc.
@@ -42,8 +42,16 @@ It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://d
 
 Just a few.
 
-- You will be asked twice for SSH authorization (once for the jump user, and once for the freshly created VM.)
-- LXD containers _nearly_ full VMs, but have some security limits regarding mounting file systems, setting system parameters, etc. These rarely interfere with "normal" development. (And when they do, you can start _real_ QEMU VMs instead of LXD containers by specifying `-vm` as the 4th part of the VM name, like `ssh xx-myrealvm1-ubuntu2204-vm.example.com`). This is needed for example if you want to run a full Kubernetes cluster. (Docker and `docker-compose` work on LXD containers with the preconfiguration that these scripts already do for you.)
+- You will be asked twice for SSH authorization. (Once for the jump user, and once for the freshly created VM.)
+- LXD containers are _nearly_ full VMs, but have some security limits (mounting file systems, setting system parameters, etc). These rarely interfere with normal dev tasks.
+
+## You can use both LXD containers *and* QEMU VMS
+
+When you occasionally run into LXD's limitations, , you can start _real_ QEMU VMs instead of LXD containers by specifying `-vm` as the 4th part of the VM name. For example `ssh xx-myrealvm1-ubuntu2004-vm8.example.com` creates a QEMU VM called "kk-myrealvm1", using 8GB of memory, running an older Ubuntu version, 20.04.
+
+Full QEMU VMs are needed -- for example -- if you want to run a full Kubernetes cluster on the VM. (But `docker` and `docker-compose` does work on LXD containers with the preconfiguration that these scripts already do for you.)
+
+The advantages of QEMU VMs is that they have fewer limitations, but the disadvantage is that they allocate the memory they are given (memory is not shared, as it is with LXD containers).
 
 ## Basic installation (using a self-signed certificate)
 
