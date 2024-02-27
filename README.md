@@ -48,7 +48,7 @@ Just a few.
 
 ## You can use both LXD containers *and* QEMU VMS
 
-When you occasionally run into LXD's limitations, , you can start _real_ QEMU VMs instead of LXD containers by specifying `-vm` as the 4th part of the VM name. For example `ssh xx-myrealvm1-ubuntu2004-vm8.example.com` creates a QEMU VM called "kk-myrealvm1", using 8GB of memory, running an older Ubuntu version, 20.04.
+When you occasionally run into LXD's limitations, , you can start _real_ QEMU VMs instead of LXD containers by specifying `-vm` as the 4th part of the VM name. For example `ssh demo-myrealvm1-ubuntu2004-vm8.example.com` creates a QEMU VM called "demo-myrealvm1", using 8GB of memory, running an older Ubuntu version, 20.04.
 
 Full QEMU VMs are needed -- for example -- if you want to run a full Kubernetes cluster on the VM. (But `docker` and `docker-compose` does work on LXD containers with the preconfiguration that these scripts already do for you.)
 
