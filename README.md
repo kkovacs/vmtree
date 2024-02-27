@@ -4,7 +4,7 @@ These scripts turn a server (or VM) into a "VM tree", on which you can easily st
 
 With 🌳VMTREE, you provision a new VM just by SSH-ing into it: `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. Running `sudo touch /killme` destroys it.
 
-Our DevOps team has been using this for 5+ years as our self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
+We didn't develop this as a product, but to scratch our own itch as a DevOps team. We've been using this (and its previous in-house version) for 5+ years as our dev environments, and we ❤️ that fresh VMs just _"grow on the VM tree for easy picking"_. It's literally how our team survived COVID's years of WFH. :)
 
 It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces), [CodeSandbox](https://codesandbox.io/) or [Nimbus](https://www.usenimbus.com/), but **self-hosted**, free (as in beer and speech) and probably a bit more old-school:
 - uses just `ssh`,
