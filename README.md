@@ -28,6 +28,7 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 - LXD containers are pre-configured to be `docker`-compatible.
 - By default VMs are running Ubuntu, but you can request different OSes just by procuring the VM like this: `ssh demo-foo-centos8.example.com` (Then on you can use just `demo-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
+- You can use it on an Internet-based server or on-premise behind a corporate firewall: it just needs the wildcard DNS settings and a wildcard TLS certificate. (We do use it both ways.)
 
 ## How does it work?
 
