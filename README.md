@@ -1,4 +1,4 @@
-# 🌳VMTREE is easy ephemeral VMs on your own hardware (or VM).
+# 🌳VMTREE is easy ephemeral VMs on your own server.
 
 These scripts turn a server (or VM) into a "VM tree", on which you can start up (and delete) ephemeral [LXD containers](https://canonical.com/lxd) or [QEMU VMs](https://ubuntu.com/blog/lxd-virtual-machines-an-overview).
 
