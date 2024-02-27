@@ -6,7 +6,7 @@ The way to procure a new VM is just to SSH into it. `ssh demo-foo.example.com` s
 
 Our DevOps team has been using this for years for our self-hosted cloud development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
-It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces) or [CodeSandbox](https://codesandbox.io/), but self-hosted and probably a bit more old-school (uses `ssh`, no `docker` is involved, they feel like normal old-school Ubuntu VMs, with a near-zero learning curve).
+It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces) or [CodeSandbox](https://codesandbox.io/), but **self-hosted** and probably a bit more old-school (uses `ssh`, no `docker` is involved, they feel like normal old-school Ubuntu VMs, with a near-zero learning curve).
 
 ## Features
 
@@ -38,12 +38,12 @@ It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://d
 - The `/vmtree/vmtree.sh` script connects your SSH session to the SSH port of the LXD container.
 - You are in! You can use the LXD container just as you would with any other VM.
 
-## Any disadvanteges?
+## Any disadvantages?
 
 Just a few.
 
 - You will be asked twice for SSH authorization. (Once for the jump user, and once for the freshly created VM.)
-- LXD containers are _nearly_ full VMs, but have some security limits (mounting file systems, setting system parameters, etc). These rarely interfere with normal dev tasks.
+- LXD containers are _nearly_ full VMs, but have some security limits regarding mounting file systems, setting system parameters, etc. These rarely interfere with normal dev tasks, and when you need, you CAN start up real VMs, too (see below).
 
 ## You can use both LXD containers *and* QEMU VMS
 
