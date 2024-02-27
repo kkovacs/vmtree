@@ -1,6 +1,6 @@
 # 🌳VMTREE is easy ephemeral VMs on your own server.
 
-These scripts turn a server (or VM) into a "VM tree", on which you can easily start up (and delete) ephemeral VMs as needed.
+These scripts turn a server (or VM) into a "VM tree", on which you can easily start up (and delete) ephemeral VMs.
 
 The way to provision a new VM is just to SSH into it. `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. Running `sudo touch /killme` destroys it.
 
