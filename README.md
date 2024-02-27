@@ -59,7 +59,7 @@ Just a few.
 - You will be asked twice for SSH authorization. (Once for the jump user, and once for the freshly created VM.)
 - LXD containers are _nearly_ full VMs, but have some security limits regarding mounting file systems, setting system parameters, etc. These rarely interfere with normal dev tasks, and when you need, you CAN start up real VMs, too (see below).
 - The Caddy http auth protects the VMs from the world outside the server, but not from other VMs on the same server. (Then again, it's assumed that your server is being used by your own team, not by your enemies.)
-- As of now there is no support company, foundation, charity, etc behind this open-source project. On the other hand, it's barely 400 lines of `bash` code (including comments), so I'm pretty sure your DevOps team can deal with it if necessary.
+- As of now there is no support company, foundation, charity, etc behind this open-source project. On the other hand, it's barely 600 lines of `bash` code (including comments), so I'm pretty sure your DevOps team can deal with it if necessary.
 
 ## You can use both LXD containers *and* QEMU VMS
 
