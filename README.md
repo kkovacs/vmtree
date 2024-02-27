@@ -22,7 +22,7 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 - VMs are considered ephemeral: by default all VMs "die" at night. (This protects resources from forgetful humans.)
 - But files in `/persist/` are persistent and survive the nightly killing of VMs. (So it's recommended to keep your work there.)
 - VMs can easily be marked to be "spared" from the nightly shutdown. (`sudo touch /nokill`)
-- LXD containers are automatically configured to be `docker`-compatible.
+- LXD containers are pre-configured to be `docker`-compatible.
 - By default VMs are running Ubuntu, but you can request different OSes just by procuring the VM like this: `ssh demo-foo-centos8.example.com` (Then on you can use just `demo-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
 
