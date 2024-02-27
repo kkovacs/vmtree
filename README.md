@@ -1,12 +1,14 @@
 # 🌳VMTREE is easy ephemeral VMs on your own server.
 
-These scripts turn a server (or VM) into a "VM tree", on which you can start up (and delete) ephemeral [LXD containers](https://canonical.com/lxd) or [QEMU VMs](https://ubuntu.com/blog/lxd-virtual-machines-an-overview) as needed.
+These scripts turn a server (or VM) into a "VM tree", on which you can easily start up (and delete) ephemeral VMs as needed.
 
 The way to provision a new VM is just to SSH into it. `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. Running `sudo touch /killme` destroys it.
 
-Our DevOps team has been using this for years for self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
+Our DevOps team has been using this for years for our self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
 It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces) or [CodeSandbox](https://codesandbox.io/), but **self-hosted** and probably a bit more old-school (uses just `ssh`, all written in `bash`, the VMs feel like normal old-school Ubuntu VMs with a near-zero learning curve, no `docker` or `k8s` is involved).
+
+For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](https://ubuntu.com/blog/lxd-virtual-machines-an-overview).
 
 ## Features
 
