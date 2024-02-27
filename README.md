@@ -27,13 +27,13 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 
 ## How does it work?
 
-- You install this an an Ubuntu server, and put a small snippet in your `.ssh/config`. (And your team members'.)
+- You install this on an Ubuntu server, and put a small snippet in your `.ssh/config`. (And your team members'.)
 - When you SSH to a 🌳VMTREE VM, your SSH client resolves the VM name you requested to the same server, because of the wildcard DNS domain.
 - Your `.ssh/config` snippet specifies to use a "jump" user called `vmtree` on the server. (Only the people who have their SSH key in the `vmtree` user's `authorized_keys` file can connect, of course.)
 - The `vmtree` user's `authorized_keys` file force-runs the `/vmtree/vmtree-vm.sh` script on the server. (It's not possible to run anything else via SSH with this user.)
 - The SSH snippet in your `.ssh/config` passes name of the VM you requested to the `/vmtree/vmtree-vm.sh` script.
 - The `/vmtree/vmtree-vm.sh` script does security checks regarding naming convention, etc.
-- The `/vmtree/vmtree-vm.sh` script starts an LXD container with the VM name you specified, passing it a `cloud-init` script that pre-configures the VM with your SSH key (and possibly other things).
+- The `/vmtree/vmtree-vm.sh` script starts an LXD container with the VM name you specified, passing it a [cloud-init](https://cloud-init.io/) script that pre-configures the VM with your SSH key (and possibly other things).
 - The `/vmtree/vmtree-vm.sh` script attaches your "personal disk" to the VM at `/persist/`.
 - The `/vmtree/vmtree-vm.sh` script waits for the VM to obtain an IP address and have SSH started.
 - The `/vmtree/vmtree-vm.sh` script connects your SSH session to the SSH port of the LXD container.
@@ -52,6 +52,7 @@ Just a few.
 
 - You will be asked twice for SSH authorization. (Once for the jump user, and once for the freshly created VM.)
 - LXD containers are _nearly_ full VMs, but have some security limits regarding mounting file systems, setting system parameters, etc. These rarely interfere with normal dev tasks, and when you need, you CAN start up real VMs, too (see below).
+- The Caddy http auth protects the VMs from the world outside the server, but not from other VMs on the same server. (Then again, it's assumed that your server is being used by your own team, not by your enemies.)
 
 ## You can use both LXD containers *and* QEMU VMS
 
