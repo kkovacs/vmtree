@@ -1,10 +1,10 @@
 # 🌳VMTREE is easy ephemeral VMs on your own server.
 
-These scripts turn a server (or VM) into a "VM tree", on which you can easily start up ephemeral VMs. Originally for our **self-hosted** [cloud development environments](https://www.usenimbus.com/post/the-guide-to-cloud-dev-environments), but usable in many ways: in a **CI/CD pipeline**, as **acceptance testing environments**, for **demoing purposes**, or really anything you can use an Ubuntu VM for).
+These scripts turn a server (or VM) into a "VM tree", on which you can easily start up ephemeral VMs. Originally for our **self-hosted** [cloud development environments](https://www.usenimbus.com/post/the-guide-to-cloud-dev-environments), but usable in many ways: in a **CI/CD pipeline**, as **acceptance testing environments**, for **demoing purposes**, or really anything you can use an Ubuntu VM for.
 
-With 🌳VMTREE, the way to provision a new VM is just to SSH into it. `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. Running `sudo touch /killme` destroys it.
+With 🌳VMTREE, you provision a new VM just by SSH-ing into it: `ssh demo-foo.example.com` starts up a fresh VM called `demo-foo` and connects to it. Running `sudo touch /killme` destroys it.
 
-Our DevOps team has been using this for years for our self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
+Our DevOps team has been using this for 5+ years as our self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
 It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces), [CodeSandbox](https://codesandbox.io/) or [Nimbus](https://www.usenimbus.com/), but self-hosted and probably a bit more old-school:
 - uses just `ssh`,
