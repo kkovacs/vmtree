@@ -1,5 +1,5 @@
 ==================================== KILL POLICY ====================================
-- All VMs get deleted at night by DEFAULT. (Even "demo-xxx" VMs.)
+- All VMs get deleted at night by DEFAULT.
 - BUT! YOU CAN make any VM survive the night by running: "sudo touch /nokill"
   - "nokill"-ed "demo-xxx" VMs will keep running (don't power down).
   - "nokill"-ed "personal" VMs WILL POWER DOWN at night, but DON'T get deleted.
