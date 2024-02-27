@@ -31,13 +31,21 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 - You install this an an Ubuntu server, and put a small snippet in your `.ssh/config`. (And your team members'.)
 - When you SSH to a 🌳VMTREE VM, your SSH client resolves the VM name you requested to the same server, because of the wildcard DNS domain.
 - Your `.ssh/config` snippet specifies to use a "jump" user called `vmtree` on the server. (Only the people who have their SSH key in the `vmtree` user's `authorized_keys` file can connect, of course.)
-- The `vmtree` user's `authorized_keys` file force-runs the `/vmtree/vmtree.sh` script on the server. (It's not possible to run anything else via SSH with this user.)
-- The SSH snippet in your `.ssh/config` passes name of the VM you requested to the `/vmtree/vmtree.sh` script.
-- The `/vmtree/vmtree.sh` script does security checks regarding naming convention, etc.
-- The `/vmtree/vmtree.sh` script starts an LXD container with the VM name you specified, passing it a `cloud-init` script that pre-configures the VM with your SSH key (and possibly other things).
-- The `/vmtree/vmtree.sh` script waits for the VM to obtain an IP address and have SSH started.
-- The `/vmtree/vmtree.sh` script connects your SSH session to the SSH port of the LXD container.
+- The `vmtree` user's `authorized_keys` file force-runs the `/vmtree/vmtree-vm.sh` script on the server. (It's not possible to run anything else via SSH with this user.)
+- The SSH snippet in your `.ssh/config` passes name of the VM you requested to the `/vmtree/vmtree-vm.sh` script.
+- The `/vmtree/vmtree-vm.sh` script does security checks regarding naming convention, etc.
+- The `/vmtree/vmtree-vm.sh` script starts an LXD container with the VM name you specified, passing it a `cloud-init` script that pre-configures the VM with your SSH key (and possibly other things).
+- The `/vmtree/vmtree-vm.sh` script attaches your "personal disk" to the VM at `/persist/`.
+- The `/vmtree/vmtree-vm.sh` script waits for the VM to obtain an IP address and have SSH started.
+- The `/vmtree/vmtree-vm.sh` script connects your SSH session to the SSH port of the LXD container.
 - You are in! You can use the LXD container just as you would with any other VM.
+
+And from `cron`:
+
+- Every minute, `/vmtree/cron-killme.sh` checks for a `/killme` file on the VMs, and if one's there, deletes the VM.
+- Every minute, `/vmtree/cron-nopassword.sh` checks for a `/nopassword` file on the VMs, and if one's there, reconfigures Caddy to NOT do HTTP authentication for the VM's subdomain.
+- Every day (by default at 6am), `/vmtree/cron-stop.sh` checks for a `/nokill` file on the VMs, and if the file is NOT THERE, deletes the VM. (If it's a personal VM, still stops the VM, but doesn't delete. This is because people forget about their VMs.)
+- Every day `/vmtree/cron-renew.sh` checks if the TLS certificate needs to be renewed, and renews it if necessary, with [acme.sh](https://github.com/acmesh-official/acme.sh).
 
 ## Any disadvantages?
 
