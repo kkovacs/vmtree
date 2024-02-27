@@ -10,7 +10,7 @@ It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://d
 - uses just `ssh`,
 - all written in `bash`,
 - the VMs are regular Ubuntu VMs with a near-zero learning curve,
-- no `docker` or `k8s` involved, no `.json` files in `git` repos (you can add these yourself, if you want to).
+- no `docker` or `k8s` involved, no `.json` files in `git` repos (but you can add anything if you want to).
 
 For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](https://ubuntu.com/blog/lxd-virtual-machines-an-overview).
 
