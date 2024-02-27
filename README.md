@@ -18,10 +18,9 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 - There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `demo-`. Personal ones with `username-`.)
 - Port 80 of every VM is automatically exposed over HTTPS, like `https://demo-foo.example.com`. (A pre-configured [Caddy reverse-proxy](https://caddyserver.com/) deals with TLS and forwards HTTP requests to the right VM.)
 - But every subdomain is protected with HTTP password automatically, so forgetful humans don't accidentally expose random stuff to the world. (Can be disabled on a per-VM basis by `sudo touch /nopassword`.)
-- The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer and working on multiple VMs easy.)
-- VMs are considered ephemeral: by default all VMs "die" at night. (This protects resources from forgetful humans.)
+- The directory `/persist/` is shared between a user's all personal VMs. (Makes working on multiple VMs easy, even at the same time.)
+- VMs are considered ephemeral: by default all VMs "die" at night, to protect resources from forgetful humans. (Can be disabled on a per-VM basis by `sudo touch /nokill`.)
 - But files in `/persist/` are persistent and survive the nightly killing of VMs. (So it's recommended to keep your work there.)
-- VMs can easily be marked to be "spared" from the nightly shutdown. (`sudo touch /nokill`)
 - LXD containers are pre-configured to be `docker`-compatible.
 - By default VMs are running Ubuntu, but you can request different OSes just by procuring the VM like this: `ssh demo-foo-centos8.example.com` (Then on you can use just `demo-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
