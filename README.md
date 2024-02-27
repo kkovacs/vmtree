@@ -6,7 +6,7 @@ With 🌳VMTREE, you provision a new VM just by SSH-ing into it: `ssh demo-foo.e
 
 Our DevOps team has been using this for 5+ years as our self-hosted "cloud" development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
-It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces), [CodeSandbox](https://codesandbox.io/) or [Nimbus](https://www.usenimbus.com/), but self-hosted and probably a bit more old-school:
+It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces), [CodeSandbox](https://codesandbox.io/) or [Nimbus](https://www.usenimbus.com/), but **self-hosted**, free (as in beer and speech) and probably a bit more old-school:
 - uses just `ssh`,
 - all written in `bash`,
 - the VMs are regular Ubuntu VMs with a near-zero learning curve,
