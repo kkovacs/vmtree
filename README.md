@@ -16,7 +16,7 @@ For the VMs, it uses [LXD containers](https://canonical.com/lxd) or [QEMU VMs](h
 - Works seamlessly with Visual Studio Code's official [Remote - SSH](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-ssh) extension.
 - Uses LXD containers, which share RAM, CPU and disk space, providing high VM density.
 - There are "personal" and "shared" VMs. (Shared VMs are the ones starting with `demo-`. Personal ones with `username-`.)
-- Port 80 of every VM is automatically exposed over HTTPS, like `https://demo-foo.example.com`. (A preconfigured [Caddy reverse-proxy](https://caddyserver.com/) deals with TLS and forwards HTTP requests to the right VM.)
+- Port 80 of every VM is automatically exposed over HTTPS, like `https://demo-foo.example.com`. (A pre-configured [Caddy reverse-proxy](https://caddyserver.com/) deals with TLS and forwards HTTP requests to the right VM.)
 - But every subdomain is protected with HTTP password automatically, so forgetful humans don't accidentally expose random stuff to the world. (Can be disabled on a per-VM basis by `sudo touch /nopassword`.)
 - The directory `/persist/` is shared between a user's personal VMs. (This makes file transfer and working on multiple VMs easy.)
 - VMs are considered ephemeral: by default all VMs "die" at night. (This protects resources from forgetful humans.)
@@ -58,7 +58,7 @@ Just a few.
 
 When you occasionally run into LXD's limitations, , you can start _real_ QEMU VMs instead of LXD containers by specifying `-vm` as the 4th part of the VM name. For example `ssh demo-myrealvm1-ubuntu2004-vm8.example.com` creates a QEMU VM called "demo-myrealvm1", using 8GB of memory, running an older Ubuntu version, 20.04.
 
-Full QEMU VMs are needed -- for example -- if you want to run a full Kubernetes cluster on the VM. (But `docker` and `docker-compose` does work on LXD containers with the preconfiguration that these scripts already do for you.)
+Full QEMU VMs are needed -- for example -- if you want to run a full Kubernetes cluster on the VM. (But `docker` and `docker-compose` does work on LXD containers with the configuration that these scripts already do for you.)
 
 The advantages of QEMU VMs is that they have fewer limitations, but the disadvantage is that they allocate the memory they are given (memory is not shared, as it is with LXD containers).
 
