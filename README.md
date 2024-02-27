@@ -6,7 +6,7 @@ The way to procure a new VM is just to SSH into it. `ssh demo-foo.example.com` s
 
 Our DevOps team has been using this for years for our self-hosted cloud development environments, and we ❤️ that fresh VMs just grow on the "VM tree" for easy picking.
 
-It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces) or [CodeSandbox](https://codesandbox.io/), but **self-hosted** and probably a bit more old-school (uses `ssh`, no `docker` is involved, they feel like normal old-school Ubuntu VMs, with a near-zero learning curve).
+It's the same philosophy as [GitPod](https://www.gitpod.io/), [DevPod](https://devpod.sh/), [CodeSpaces](https://github.com/features/codespaces) or [CodeSandbox](https://codesandbox.io/), but **self-hosted** and probably a bit more old-school (uses just `ssh`, all written in `bash`, the VMs feel like normal old-school Ubuntu VMs with a near-zero learning curve, no `docker` or `k18s` is involved).
 
 ## Features
 
