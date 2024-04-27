@@ -28,7 +28,7 @@ if [[ ${#PARTS[@]} -eq 1 ]]; then
 	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `lxc rename`.
 	REQUSER=""
 	REQVM="${PARTS[0]}"
-	REQIMAGE="${DEFAULTIMAGE:-ubuntu2204}"
+	REQIMAGE="${DEFAULTIMAGE:-ubuntu2404}"
 	REQETC=""
 	VM="$REQVM"
 	DISKPATH="/dev/null" # Won't count since we never launch, but anyway
@@ -37,7 +37,7 @@ else
 	# Friendlier variable
 	REQUSER="${PARTS[0]}"
 	REQVM="${PARTS[1]}"
-	REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2204}}"
+	REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2404}}"
 	REQETC="${PARTS[3]}"
 	# Force "prefix-" to VM, but let anyone use "demo"
 	if [[ "$REQUSER" == "demo" ]]; then
@@ -64,7 +64,8 @@ declare -A images
 images["ubuntu2004"]="ubuntu:20.04"                  # Works 100%
 images["ubuntu2204"]="ubuntu:22.04"                  # Works 100%
 images["ubuntu2310"]="ubuntu:23.10"                  # Works 100%
-images["ubuntu2404"]="ubuntu-daily:n"                # Works 100%
+images["ubuntu2404"]="ubuntu:24.04"                  # Works 100%
+images["ubuntu2410"]="ubuntu-daily:o"                # Works 100%, daily for testing
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
@@ -81,7 +82,7 @@ images["suse155"]="images:opensuse/15.5/cloud"     # Works, not thoroughly teste
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # Needs manual enable of user account and shell change
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
-IMAGE="${images[$REQIMAGE]:-ubuntu:22.04}"
+IMAGE="${images[$REQIMAGE]:-ubuntu:24.04}"
 
 # Show info
 printf "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK\n\nThis VM's port 80 is: https://$VM.$DOMAIN/ ( $AUTHUSER / $AUTHPASS )\n\n" >&2
