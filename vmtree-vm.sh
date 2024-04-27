@@ -78,9 +78,12 @@ images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly teste
 images["suse"]="images:opensuse/tumbleweed/cloud"  # Works, not thoroughly tested
 images["suse154"]="images:opensuse/15.4/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
 images["suse155"]="images:opensuse/15.5/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
+images["oracle8"]="images:oracle/8/cloud"          # Works, not thoroughly tested
+images["oracle9"]="images:oracle/9/cloud"          # Works, not thoroughly tested
 # Tested NOT working:
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # Needs manual enable of user account and shell change
+#images["oracle7"]="images:oracle/7/cloud"         # "requires a CGroupV1 host system"
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:24.04}"
 
