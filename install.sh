@@ -171,6 +171,9 @@ if [[ "$ACME_DNS" != "selfsigned" ]]; then
 fi
 
 # Configure Caddy
+if [[ -f templates/Caddyfile.local ]]; then
+	caddyfile_local=$(<templates/Caddyfile.local)
+fi
 _template templates/Caddyfile /etc/caddy/Caddyfile -o root -g root -m 644
 
 # Restart/reload caddy

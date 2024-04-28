@@ -1,2 +1,3 @@
 /disk-*
 /.env
+/templates/Caddyfile.local

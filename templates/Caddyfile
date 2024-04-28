@@ -20,3 +20,4 @@ $([[ $ACME_DNS != "selfsigned" ]] || echo "#")        tls /etc/caddy/vmtree.crt 
                 to "{http.request.host.labels.$(echo ${DOMAIN//[!.]/} | wc -c)}.lxd:80"
         }
 }
+${caddyfile_local:-}
