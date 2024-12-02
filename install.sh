@@ -139,12 +139,14 @@ fi
 DNSIP="$(lxc network get lxdbr0 ipv4.address)"
 # Strip netmask
 DNSIP="${DNSIP%/*}"
-# Create the service file
-_template templates/lxd-dns-lxdbr0.service /etc/systemd/system/lxd-dns-lxdbr0.service
-# Make systemd learn about our new service
+# Create the systemd network file to handle DNS
+_template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
+
+# XXX Remove this after a transitory period
+# Stop the OLD service, now and forever. Ignore error if it was already removed.
+sudo systemctl disable --now lxd-dns-lxdbr0 || true
+rm /etc/systemd/system/lxd-dns-lxdbr0.service || true
 sudo systemctl daemon-reload
-# Start the service, now and forever
-sudo systemctl enable --now lxd-dns-lxdbr0
 
 ########################################
 # Certificates - acme.sh

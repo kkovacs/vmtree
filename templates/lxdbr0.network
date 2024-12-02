@@ -1,0 +1,6 @@
+[Match]
+Name=lxdbr0
+
+[Network]
+DNS=${DNSIP}
+Domains=~lxd
