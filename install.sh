@@ -143,7 +143,11 @@ DNSIP="${DNSIP%/*}"
 _template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
 
 # Reload systemd networking, so the above change get applied
-networkctl reload
+# XXX Ugly workaround, see https://github.com/canonical/lxd/issues/14588
+if networkctl | grep lxdbr0.*unmanaged; then
+	# Restart LXD to correctly apply network settings
+	snap restart lxd
+fi
 
 # XXX Remove this after a transitory period
 # Stop the OLD service, now and forever. Ignore error if it was already removed.
