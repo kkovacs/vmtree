@@ -24,8 +24,8 @@ fi
 
 # Ensure correct host OS
 source /etc/os-release
-if [[ "$VERSION_ID" != "20.04" && "$VERSION_ID" != "22.04" ]]; then
-	echo "ERROR: Please install on Ubuntu 20.04 or 22.04!"
+if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "22.04" ]]; then
+	echo "ERROR: Please install on Ubuntu 24.04 or 22.04!"
 	exit 1
 fi
 
