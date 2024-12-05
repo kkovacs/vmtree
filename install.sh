@@ -228,6 +228,7 @@ cat <<EOF
 *** You NEED TO REBOOT, because of an interplay between LXD and SYSTEMD just after install. ***
 ***********************************************************************************************
 EOF
+fi
 
 # Success
 printf "\nSUCCESS! vmtree had been set up!\n"
