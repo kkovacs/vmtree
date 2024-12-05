@@ -142,6 +142,9 @@ DNSIP="${DNSIP%/*}"
 # Create the systemd network file to handle DNS
 _template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
 
+# Reload systemd networking, so the above change get applied
+networkctl reload
+
 # XXX Remove this after a transitory period
 # Stop the OLD service, now and forever. Ignore error if it was already removed.
 sudo systemctl disable --now lxd-dns-lxdbr0 || true
