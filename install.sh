@@ -144,9 +144,10 @@ _template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
 
 # Reload systemd networking, so the above change get applied
 # XXX Ugly workaround, see https://github.com/canonical/lxd/issues/14588
+PLEASEREBOOT=0
 if networkctl | grep lxdbr0.*unmanaged; then
 	# Restart LXD to correctly apply network settings
-	snap restart lxd
+	PLEASEREBOOT=1
 fi
 
 # XXX Remove this after a transitory period
@@ -217,6 +218,15 @@ crontab <<EOF
 * * * * * /vmtree/cron-killme.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
 $([[ $ACME_DNS == "selfsigned" ]] && echo "#")9 0 * * * /vmtree/cron-renew.sh
+EOF
+
+# XXX Ugly workaround, see https://github.com/canonical/lxd/issues/14588
+if [[ $PLEASEREBOOT == 1 ]]; then
+cat <<EOF
+
+***********************************************************************************************
+*** You NEED TO REBOOT, because of an interplay between LXD and SYSTEMD just after install. ***
+***********************************************************************************************
 EOF
 
 # Success
