@@ -169,8 +169,15 @@ write_files:
 - path: /etc/sysctl.d/95-unprivileged-ports.conf
   content: |
     net.ipv4.ip_unprivileged_port_start=0
+# XXX Next 3 lines are part of the workaround for https://github.com/canonical/lxd/issues/13389
+- path: /etc/apparmor.d/local/runc
+  content: |
+    pivot_root,
 bootcmd:
 - [ "sysctl", "-w", "net.ipv4.ip_unprivileged_port_start=0" ]
+runcmd:
+# XXX Next 1 line is part of the workaround for https://github.com/canonical/lxd/issues/13389
+- [ "systemctl", "reload", "apparmor.service" ]
 EOF
 
 fi
