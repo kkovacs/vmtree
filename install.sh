@@ -177,6 +177,18 @@ for user in keys/*; do
 done
 
 ########################################
+# Configuring auto snapshots
+########################################
+
+# Should only do on ZFS, snapshots are too expensice on "dir" storage backend
+if [[ -n "$ZFS_DISK" && -n "$SNAPSHOT_EXPIRY" ]]; then
+	lxc profile set default snapshots.expiry "${SNAPSHOT_EXPIRY:-7d}"
+	lxc profile set default snapshots.schedule "15 4 * * *" # A few minutes AFTER cron-stop.sh (see below)
+	lxc profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
+fi
+
+
+########################################
 # Certificates - acme.sh
 ########################################
 
@@ -234,7 +246,7 @@ sysctl -p
 # so "every minute" scripts dont' run before things are set up,
 # causing unnecessary errors.
 crontab <<EOF
-0 6 * * * /vmtree/cron-stop.sh >/dev/null 2>&1
+0 4 * * * /vmtree/cron-stop.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-killme.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
 $([[ $ACME_DNS == "selfsigned" ]] && echo "#")9 0 * * * /vmtree/cron-renew.sh

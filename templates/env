@@ -9,6 +9,10 @@ AUTHPASS="${AUTHPASS:-$RANDOM}"
 # OPTIONAL: an empty disk or partition for LXD storage.
 #ZFS_DISK="/dev/sdb"
 
+# OPTIONAL, and ONLY with ZFS: Daily auto-snapshots.
+# Enable by uncommenting this and setting expiry.
+#SNAPSHOT_EXPIRY="7d"
+
 # Default LXD image
 # If you leave it commented, it will use the default from the script,
 # which might get updated if you update the scripts.
