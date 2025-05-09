@@ -6,6 +6,9 @@ DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 AUTHUSER="${AUTHUSER:-vmtree}"
 AUTHPASS="${AUTHPASS:-$RANDOM}"
 
+# OPTIONAL: an empty disk or partition for LXD storage.
+#ZFS_DISK="/dev/sdb"
+
 # Default LXD image
 # If you leave it commented, it will use the default from the script,
 # which might get updated if you update the scripts.

@@ -95,6 +95,7 @@ This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), an
 1. It will say that you need to fill out the `/vmtree/.env` file. Fill out:
    - your domain name (`example.com`)
    - your desired automatic HTTP AUTH username / password
-   - your DNS provider and its token to use with acme.sh.
+   - your DNS provider and its token to use with acme.sh
+   - optionally, a storage disk/partition (will be formatted with ZFS)
 1. Run `sudo /vmtree/install.sh` again to finish the installation.
 1. Distribute the snippet it prints out to your team, to put into their `.ssh/config` files.

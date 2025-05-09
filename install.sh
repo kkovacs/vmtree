@@ -57,7 +57,6 @@ if [[ " $* " == *" --skip-install "* ]]; then
 	exit 0
 fi
 
-
 # Ensure /vmtree
 install -o root -g root -m 755 -d /vmtree
 # Ensure /vmtree/disks
@@ -85,22 +84,6 @@ if [[ ! -d "/home/vmtree" ]]; then
 fi
 # Clear ssh pubkey file for filling up
 install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
-# Add authorized_keys to vmtree user
-for user in keys/*; do
-	# Load ssh key
-	# Shellcheck thinks it's unused, but it's not.
-	# shellcheck disable=SC2034
-	mapfile -t pubkeys <"$user"
-	# trim directory name
-	user="${user##*/}"
-	# Make disk
-	DISKPATH="/vmtree/disks/${user}"
-	install -o 1001000 -g 1001000 -d "$DISKPATH"
-	# Add restricted key(s)
-	for pubkey in "${pubkeys[@]}"; do
-		echo "command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
-	done
-done
 
 ########################################
 # Caddy reverse proxy
@@ -115,7 +98,7 @@ fi
 
 # Install
 if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades snapd openssh-server; do sleep 1; done;
+	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades snapd openssh-server zfsutils-linux ; do sleep 1; done;
 fi
 
 ########################################
@@ -129,7 +112,17 @@ fi
 
 # Initialize lxd only if not initialized
 if ! lxc storage show default; then
-	lxd init --auto
+	# If ZFS_DISK is defined...
+	if [[ -n "$ZFS_DISK" ]]; then
+		# initialize with the "zfs" storage driver
+		lxd init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
+		# and create a separate volume for "/persist" disks on that disk
+		zfs create default/vmtree_disks -o mountpoint=/vmtree/disks
+	else
+		# or else, initialize with default (usually "dir") storage driver
+		lxd init --auto
+	fi
+
 fi
 
 # Set up systemd-resolved,
@@ -155,6 +148,27 @@ fi
 sudo systemctl disable --now lxd-dns-lxdbr0 || true
 rm /etc/systemd/system/lxd-dns-lxdbr0.service || true
 sudo systemctl daemon-reload
+
+########################################
+# Creating /persist/ disks
+########################################
+
+# Add authorized_keys to vmtree user
+for user in keys/*; do
+	# Load ssh key
+	# Shellcheck thinks it's unused, but it's not.
+	# shellcheck disable=SC2034
+	mapfile -t pubkeys <"$user"
+	# trim directory name
+	user="${user##*/}"
+	# Make disk
+	DISKPATH="/vmtree/disks/${user}"
+	install -o 1001000 -g 1001000 -d "$DISKPATH"
+	# Add restricted key(s)
+	for pubkey in "${pubkeys[@]}"; do
+		echo "command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
+	done
+done
 
 ########################################
 # Certificates - acme.sh
