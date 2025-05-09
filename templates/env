@@ -13,7 +13,7 @@ AUTHPASS="${AUTHPASS:-$RANDOM}"
 # If you leave it commented, it will use the default from the script,
 # which might get updated if you update the scripts.
 # You can "lock" this vmtree to a given image with this.
-#DEFAULTIMAGE="ubuntu2204"
+#DEFAULTIMAGE="ubuntu2404"
 
 # acme.sh DNS provider setup.
 # More info:
