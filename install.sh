@@ -116,8 +116,6 @@ if ! lxc storage show default; then
 	if [[ -n "$ZFS_DISK" ]]; then
 		# initialize with the "zfs" storage driver
 		lxd init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
-		# and create a separate volume for "/persist" disks on that disk
-		zfs create default/vmtree_disks -o mountpoint=/vmtree/disks
 	else
 		# or else, initialize with default (usually "dir") storage driver
 		lxd init --auto
@@ -152,6 +150,14 @@ sudo systemctl daemon-reload
 ########################################
 # Creating /persist/ disks
 ########################################
+
+# if on ZFS, then create a volume for "/persist" disks in that
+if [[ -n "$ZFS_DISK" ]]; then
+	# only if it was not created yet
+	if ! mountpoint /vmtree/disks/; then
+		zfs create default/vmtree_disks -o mountpoint=/vmtree/disks
+	fi
+fi
 
 # Add authorized_keys to vmtree user
 for user in keys/*; do
