@@ -63,9 +63,9 @@ declare -A images
 # Best:
 images["ubuntu2004"]="ubuntu:20.04"                  # Works 100%
 images["ubuntu2204"]="ubuntu:22.04"                  # Works 100%
-images["ubuntu2310"]="ubuntu:23.10"                  # Works 100%
 images["ubuntu2404"]="ubuntu:24.04"                  # Works 100%
-images["ubuntu2410"]="ubuntu-daily:o"                # Works 100%, daily for testing
+images["ubuntu2410"]="ubuntu-daily:o"                # Works 100%
+images["ubuntu2504"]="ubuntu-daily:p"                # Works 100%
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
@@ -73,16 +73,17 @@ images["centos8"]="images:centos/8-Stream/cloud"   # Works, not thoroughly teste
 images["centos9"]="images:centos/9-Stream/cloud"   # Works, not thoroughly tested
 images["debian11"]="images:debian/11/cloud"        # First connect never works, SSH install takes time
 images["debian12"]="images:debian/12/cloud"        # First connect never works, SSH install takes time
+images["debian13"]="images:debian/13/cloud"        # Works, not thoroughly tested
 images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly tested
 images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly tested
 images["suse"]="images:opensuse/tumbleweed/cloud"  # Works, not thoroughly tested
-images["suse154"]="images:opensuse/15.4/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
-images["suse155"]="images:opensuse/15.5/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
+images["suse155"]="images:opensuse/15.6/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
 images["oracle8"]="images:oracle/8/cloud"          # Works, not thoroughly tested
 images["oracle9"]="images:oracle/9/cloud"          # Works, not thoroughly tested
 # Tested NOT working:
-#images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["alpine"]="images:alpine/edge/cloud"       # Needs manual enable of user account and shell change
+#images["arch"]="images:archlinux"                 # Needs "pacman -S openssh && systemctl enable --now sshd", add ssh key, then ssh to root@... works
+#images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["oracle7"]="images:oracle/7/cloud"         # "requires a CGroupV1 host system"
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]:-ubuntu:24.04}"
