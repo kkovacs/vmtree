@@ -187,7 +187,6 @@ if [[ -n "$ZFS_DISK" && -n "$SNAPSHOT_EXPIRY" ]]; then
 	lxc profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
 fi
 
-
 ########################################
 # Certificates - acme.sh
 ########################################
