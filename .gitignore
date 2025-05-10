@@ -1,3 +1,4 @@
 /disk-*
 /.env
 /templates/Caddyfile.local
+/disks/
