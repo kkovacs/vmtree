@@ -59,8 +59,10 @@ fi
 
 # Ensure /vmtree
 install -o root -g root -m 755 -d /vmtree
-# Ensure /vmtree/disks
-install -o root -g root -m 755 -d /vmtree/disks
+# Ensure /vmtree/disks, but only if not using ZFS. (On ZFS, it's a mountpoint option)
+if [[ -z "$ZFS_DISK" ]]; then
+	install -o root -g root -m 755 -d /vmtree/disks
+fi
 # Ensure /vmtree/keys
 install -o root -g root -m 755 -d /vmtree/keys
 # Ensure /vmtree/log
