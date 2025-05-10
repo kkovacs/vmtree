@@ -71,7 +71,7 @@ The advantages of QEMU VMs is that they have fewer limitations, but the disadvan
 
 ## Basic installation (using a self-signed certificate)
 
-On an Ubuntu 20.04 or 22.04 server with a public IP address, run:
+On an Ubuntu 24.04 or 22.04 server with a public IP address, run:
 
 ```bash
 sudo git clone https://github.com/kkovacs/vmtree.git /vmtree
@@ -87,7 +87,7 @@ This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), an
 
 1. Get a domain that you will use for VMTREE. (From now on: `example.com`).
 1. Host the domain on a DNS provider [supported by acme.sh](https://github.com/acmesh-official/acme.sh/wiki/dnsapi). (Needed for the wildcard TLS certificate.)
-1. Get a powerful host server that you will use for VMTREE, running Ubuntu 22.04 or 20.04.
+1. Get a powerful host server that you will use for VMTREE, running Ubuntu 22.04 or 24.04.
 1. Configure DNS so `example.com` and `*.example.com` point to the host server's IP. (Wait until it propagates.)
 1. On your host server, `sudo git clone https://github.com/kkovacs/vmtree.git /vmtree`
 1. Copy your and your teams's SSH public keys (`~/.ssh/id_*.pub` files on their PCs) to `/vmtree/keys/<username>` files.
