@@ -120,7 +120,9 @@ if ! lxc storage show default; then
 		# or else, initialize with default (usually "dir") storage driver
 		lxd init --auto
 	fi
-
+	# This is to prevent the LXD UI activating automatically if we ever use
+	# this server as an LXD remote (see "lxd-setup-as-remote.sh")
+	sudo snap set lxd ui.enable=false
 fi
 
 # Set up systemd-resolved,
