@@ -123,6 +123,8 @@ if ! lxc storage show default; then
 	# This is to prevent the LXD UI activating automatically if we ever use
 	# this server as an LXD remote (see "lxd-setup-as-remote.sh")
 	sudo snap set lxd ui.enable=false
+	# To increase performance (because rsync seems CPU-bound) if we ever "lxc copy ..."
+	lxc storage set default rsync.compression false
 fi
 
 # Set up systemd-resolved,

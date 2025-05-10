@@ -13,10 +13,6 @@
 # by LXD while copying:
 #
 #     lxc copy --mode push --stateless --instance-only NAME-OF-LXD-CONTAINER/snapshot-XXXXXX-X NAME-OF-REMOTE-LXD-SERVER:
-#
-# To increase performance (because rsync seems CPU-bound), it's recommended to run this too on the SOURCE machine:
-#
-#     lxc storage set default rsync.compression false
 
 # Strict mode
 set -e
