@@ -210,7 +210,7 @@ if [[ "$ACME_DNS" != "selfsigned" ]]; then
 	# Provision certificate if not set up yet
 	# (Settings come from .env)
 	if ! compgen -G /root/.acme.sh/"$DOMAIN"*/fullchain.cer; then
-		/root/.acme.sh/acme.sh --issue --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
+		/root/.acme.sh/acme.sh --issue --server letsencrypt --dns "$ACME_DNS" -d "$DOMAIN" -d "*.$DOMAIN"
 	fi
 	# Run cron script manually,
 	# this deploys acme.sh certs to Caddy
