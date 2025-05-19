@@ -4,4 +4,6 @@
   - "nokill"-ed "demo-xxx" VMs will keep running (don't power down).
   - "nokill"-ed "personal" VMs WILL POWER DOWN at night, but DON'T get deleted.
 - To destroy a VM manually, run: "sudo touch /killme", and wait a minute.
+- To snapshot a VM, run: "sudo touch /snapshotme", and wait a minute until the
+  file "/snapshotme" disappears.
 =====================================================================================

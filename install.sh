@@ -253,6 +253,7 @@ sysctl -p
 crontab <<EOF
 0 4 * * * /vmtree/cron-stop.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-killme.sh >/dev/null 2>&1
+* * * * * /vmtree/cron-snapshotme.sh >/dev/null 2>&1
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
 $([[ $ACME_DNS == "selfsigned" ]] && echo "#")9 0 * * * /vmtree/cron-renew.sh
 EOF
