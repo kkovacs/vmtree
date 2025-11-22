@@ -64,8 +64,8 @@ declare -A images
 images["ubuntu2004"]="ubuntu:20.04"                  # Works 100%
 images["ubuntu2204"]="ubuntu:22.04"                  # Works 100%
 images["ubuntu2404"]="ubuntu:24.04"                  # Works 100%
-images["ubuntu2410"]="ubuntu-daily:o"                # Works 100%
 images["ubuntu2504"]="ubuntu-daily:p"                # Works 100%
+images["ubuntu2510"]="ubuntu-daily:q"                # Works 100%
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
