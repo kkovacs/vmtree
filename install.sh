@@ -108,7 +108,7 @@ chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directo
 # Create vmtree unix user
 if [[ ! -d "/home/vmtree" ]]; then
 	adduser --disabled-password --gecos "" "vmtree"
-	usermod -G $GROUPS "vmtree"
+	usermod -G $TOOLGROUP "vmtree"
 	# Ensure directory
 	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
 fi

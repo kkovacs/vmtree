@@ -5,7 +5,7 @@ DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 # INCUS
 TOOL=incus
 TOOLADMIN="incus admin"
-GROUPS="incus-admin"
+TOOLGROUP="incus-admin"
 BRIDGE=incusbr0
 # If used LXD-TO-INCUS:
 #BRIDGE=lxdbr0
@@ -13,7 +13,7 @@ BRIDGE=incusbr0
 # LXD
 #TOOL=lxc
 #TOOLADMIN=lxd
-#GROUPS=lxd
+#TOOLGROUP=lxd
 #BRIDGE=lxdbr0
 
 # Automatic HTTP authentication. Password will be hashed automatically.
