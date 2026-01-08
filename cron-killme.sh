@@ -10,9 +10,9 @@ source .env
 export PATH="$PATH:/snap/bin"
 
 # Find marker file
-for VM in $(lxc list --format csv --columns n); do
-	if lxc file pull "$VM/killme" - 2>/dev/null ; then
+for VM in $(incus list --format csv --columns n); do
+	if incus file pull "$VM/killme" - 2>/dev/null ; then
 		echo "Killme deleting $VM";
-		lxc delete -f "$VM"
+		incus delete -f "$VM"
 	fi
 done

@@ -25,7 +25,7 @@ unset SAVEIFS
 # One word vmname or more?
 if [[ ${#PARTS[@]} -eq 1 ]]; then
 	# One word vm name is a special case. We never try to launch it, just connect -- if the SSH key is in.
-	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `lxc rename`.
+	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `incus rename`.
 	REQUSER=""
 	REQVM="${PARTS[0]}"
 	REQIMAGE="${DEFAULTIMAGE:-ubuntu2404}"
@@ -55,17 +55,14 @@ else
 	DISKPATH="/vmtree/disks/$DISK"
 
 	echo "Just FYI - you have the following VMs here:" >&2
-	lxc list -c nst4,image.release,mcl "^${REQUSER}-" >&2
+	incus list -c nst4,image.release,mcl "^${REQUSER}-" >&2
 fi
 
 # Images
 declare -A images
 # Best:
-images["ubuntu2004"]="ubuntu:20.04"                  # Works 100%
-images["ubuntu2204"]="ubuntu:22.04"                  # Works 100%
-images["ubuntu2404"]="ubuntu:24.04"                  # Works 100%
-images["ubuntu2504"]="ubuntu-daily:p"                # Works 100%
-images["ubuntu2510"]="ubuntu-daily:q"                # Works 100%
+images["ubuntu2204"]="images:ubuntu/noble/cloud"   # Works 100%
+images["ubuntu2404"]="images:ubuntu/jammy/cloud"   # Works 100%
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
@@ -86,12 +83,12 @@ images["oracle9"]="images:oracle/9/cloud"          # Works, not thoroughly teste
 #images["centos7"]="images:centos/7/cloud"         # "requires a CGroupV1 host system"
 #images["oracle7"]="images:oracle/7/cloud"         # "requires a CGroupV1 host system"
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
-IMAGE="${images[$REQIMAGE]:-ubuntu:24.04}"
+IMAGE="${images[$REQIMAGE]}"
 
 # Show info
 printf "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK\n\nThis VM's port 80 is: https://$VM.$DOMAIN/ ( $AUTHUSER / $AUTHPASS )\n\n" >&2
 
-# Default lxc options
+# Default incus options
 OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
 
 # REAL VM (as opposed to container) mode
@@ -113,7 +110,7 @@ cat >&2 <templates/motd
 echo >&2 # empty line
 
 # Does the VM exists?
-if ! lxc info "$VM" >/dev/null 2>&1 ; then
+if ! incus info "$VM" >/dev/null 2>&1 ; then
 	# Sanity check
 	if [[ "$REQUSER" != "$SSHUSER" && "$REQUSER" != "demo" ]]; then
 		echo "ERROR: you can only start VMs called $SSHUSER-xxx and demo-xxx" >&2
@@ -121,15 +118,15 @@ if ! lxc info "$VM" >/dev/null 2>&1 ; then
 	fi
 	# launch docker-capable vm
 	echo "Initializing" >&2
-	lxc init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
+	incus init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
 	# Mount disk if exists
 	if [[ -d "$DISKPATH" ]]; then
 		echo "Attaching disks/$DISK" >&2
-		lxc config device add "$VM" "$DISK" disk "source=$DISKPATH" "path=/persist" >&2
+		incus config device add "$VM" "$DISK" disk "source=$DISKPATH" "path=/persist" >&2
 	fi
 	echo "Cloud-config" >&2
 	# Apply cloud-config
-	lxc config set "$VM" user.user-data - >&2 <<EOF
+	incus config set "$VM" user.user-data - >&2 <<EOF
 #cloud-config
 users:
 - name: user
@@ -184,19 +181,19 @@ EOF
 fi
 
 echo "Starting" >&2
-lxc start "$VM" >/dev/null >&2
+incus start "$VM" >/dev/null >&2
 
 # Waiting for IP, for SSH port to open, and for '/run/nologin' to go away
 echo -n "Waiting for ready" >&2
-until (echo >"/dev/tcp/$VM.lxd/22") 2>/dev/null && ! lxc file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
+until (echo >"/dev/tcp/$VM.incus/22") 2>/dev/null && ! incus file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
         echo -n "." >&2
         sleep 1
 done
 
 # Display IP
-IPS="$(lxc list --format csv -c 4 "^${VM}$")"
+IPS="$(incus list --format csv -c 4 "^${VM}$")"
 echo " IPs: $IPS" >&2
 
 # stdio fwd
 echo "Connecting" >&2
-nc "${VM}.lxd" 22
+nc "${VM}.incus" 22

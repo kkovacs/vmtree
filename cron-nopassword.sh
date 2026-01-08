@@ -19,8 +19,8 @@ CHECKSUM1=$(sha256sum "$FILE" | awk '{print $1}')
 echo "[\"placeholder-httpnoauth.${DOMAIN}\"" >"$FILE"
 
 # Find marker file
-for VM in $(lxc list --format csv --columns n); do
-	if lxc file pull "$VM/nopassword" - 2>/dev/null ; then
+for VM in $(incus list --format csv --columns n); do
+	if incus file pull "$VM/nopassword" - 2>/dev/null ; then
 		echo ",\"${VM}.${DOMAIN}\"" >>"$FILE"
 	fi
 done

@@ -1,7 +1,7 @@
 [Match]
-Name=lxdbr0
+Name=incusbr0
 
 [Network]
 Address=${DNSIP}/24
 DNS=${DNSIP}
-Domains=~lxd
+Domains=~incus

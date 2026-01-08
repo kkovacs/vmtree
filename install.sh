@@ -24,8 +24,8 @@ fi
 
 # Ensure correct host OS
 source /etc/os-release
-if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "22.04" ]]; then
-	echo "ERROR: Please install on Ubuntu 24.04 or 22.04!"
+if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "26.04" ]]; then
+	echo "ERROR: Please install on Ubuntu 24.04 or 26.04!"
 	exit 1
 fi
 
@@ -80,7 +80,7 @@ chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directo
 # Create vmtree unix user
 if [[ ! -d "/home/vmtree" ]]; then
 	adduser --disabled-password --gecos "" "vmtree"
-	usermod -G lxd "vmtree"
+	usermod -G incus,incus-admin "vmtree"
 	# Ensure directory
 	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
 fi
@@ -99,59 +99,46 @@ if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
 fi
 
 # Install
-if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades snapd openssh-server zfsutils-linux ; do sleep 1; done;
+if [[ ! -f /usr/bin/caddy || ! -f /usr/bin/incus ]]; then
+	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades openssh-server zfsutils-linux incus ; do sleep 1; done;
 fi
 
 ########################################
 # LXD Linux containers
 ########################################
 
-# Install LXD if not installed
-if ! type lxd; then
-	snap install --classic lxd
-fi
-
-# Initialize lxd only if not initialized
-if ! lxc storage show default; then
+# Initialize incus admin only if not initialized
+if ! incus storage show default; then
 	# If ZFS_DISK is defined...
 	if [[ -n "$ZFS_DISK" ]]; then
 		# initialize with the "zfs" storage driver
-		lxd init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
+		incus admin init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
 	else
 		# or else, initialize with default (usually "dir") storage driver
-		lxd init --auto
+		incus admin init --auto
 	fi
-	# This is to prevent the LXD UI activating automatically if we ever use
-	# this server as an LXD remote (see "lxd-setup-as-remote.sh")
-	sudo snap set lxd ui.enable=false
-	# To increase performance (because rsync seems CPU-bound) if we ever "lxc copy ..."
-	lxc storage set default rsync.compression false
+	# To increase performance (because rsync seems CPU-bound) if we ever "incus copy ..."
+	incus storage set default rsync.compression false
 fi
 
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
 # Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
-# Get lxd's dnsmasq IP
-DNSIP="$(lxc network get lxdbr0 ipv4.address)"
+# Get incus's dnsmasq IP
+DNSIP="$(incus network get incusbr0 ipv4.address)"
 # Strip netmask
 DNSIP="${DNSIP%/*}"
 # Create the systemd network file to handle DNS
-_template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
+_template templates/incusbr0.network /etc/systemd/network/incusbr0.network
 
 # Reload systemd networking, so the above change get applied
 # XXX Ugly workaround, see https://github.com/canonical/lxd/issues/14588
-if networkctl | grep lxdbr0.*unmanaged; then
+if networkctl | grep incusbr0.*unmanaged; then
 	# Restart LXD to correctly apply network settings
 	sudo networkctl reload
-	snap restart lxd
+	sudo systemctl daemon-reload
+	sudo systemctl restart incus
 fi
-
-# XXX Remove this after a transitory period
-# Stop the OLD service, now and forever. Ignore error if it was already removed.
-sudo systemctl disable --now lxd-dns-lxdbr0 || true
-rm /etc/systemd/system/lxd-dns-lxdbr0.service || true
-sudo systemctl daemon-reload
 
 ########################################
 # Creating /persist/ disks
@@ -188,9 +175,9 @@ done
 
 # Should only do on ZFS, snapshots are too expensice on "dir" storage backend
 if [[ -n "$ZFS_DISK" && -n "$SNAPSHOT_EXPIRY" ]]; then
-	lxc profile set default snapshots.expiry "${SNAPSHOT_EXPIRY:-7d}"
-	lxc profile set default snapshots.schedule "15 4 * * *" # A few minutes BEFORE cron-stop.sh (see below)
-	lxc profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
+	incus profile set default snapshots.expiry "${SNAPSHOT_EXPIRY:-7d}"
+	incus profile set default snapshots.schedule "15 4 * * *" # A few minutes BEFORE cron-stop.sh (see below)
+	incus profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
 fi
 
 ########################################
