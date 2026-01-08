@@ -185,7 +185,7 @@ $TOOL start "$VM" >/dev/null >&2
 
 # Waiting for IP, for SSH port to open, and for '/run/nologin' to go away
 echo -n "Waiting for ready" >&2
-until (echo >"/dev/tcp/$VM.$TOOL/22") 2>/dev/null && ! $TOOL file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
+until (echo >"/dev/tcp/$VM.$LOCALDOMAIN/22") 2>/dev/null && ! $TOOL file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
         echo -n "." >&2
         sleep 1
 done
@@ -196,4 +196,4 @@ echo " IPs: $IPS" >&2
 
 # stdio fwd
 echo "Connecting" >&2
-nc "${VM}.$TOOL" 22
+nc "${VM}.$LOCALDOMAIN" 22

@@ -6,14 +6,16 @@ DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 TOOL=incus
 TOOLADMIN="incus admin"
 TOOLGROUP="incus-admin"
+LOCALDOMAIN=incus
 BRIDGE=incusbr0
-# If used LXD-TO-INCUS:
+# Or, if used after LXD-TO-INCUS:
 #BRIDGE=lxdbr0
 
 # LXD
 #TOOL=lxc
 #TOOLADMIN=lxd
 #TOOLGROUP=lxd
+#LOCALDOMAIN=lxd
 #BRIDGE=lxdbr0
 
 # Automatic HTTP authentication. Password will be hashed automatically.

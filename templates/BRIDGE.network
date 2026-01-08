@@ -4,4 +4,4 @@ Name=${BRIDGE}
 [Network]
 Address=${DNSIP}/24
 DNS=${DNSIP}
-Domains=~${TOOL}
+Domains=~${LOCALDOMAIN}
