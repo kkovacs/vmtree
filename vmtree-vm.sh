@@ -61,8 +61,8 @@ fi
 # Images
 declare -A images
 # Best:
-images["ubuntu2204"]="images:ubuntu/noble/cloud"   # Works 100%
-images["ubuntu2404"]="images:ubuntu/jammy/cloud"   # Works 100%
+images["ubuntu2404"]="images:ubuntu/noble/cloud"   # Works 100%
+images["ubuntu2204"]="images:ubuntu/jammy/cloud"   # Works 100%
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
