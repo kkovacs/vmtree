@@ -44,7 +44,6 @@ fi
 
 # Configuration
 source .env
-source detect.sh
 
 # Do we know our domain already? (From the .env file, usually)
 if [[ -z "$DOMAIN" ]]; then
@@ -80,22 +79,21 @@ if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
 	until apt-get update; do sleep 1; done
 fi
 
-# Install. This is one place we need to care separately about Incus and LXD.
-if [[ ! -f /usr/bin/caddy || ! -f /usr/bin/$TOOL ]]; then
+# Install.
+if [[ ! -f /usr/bin/caddy ]]; then
 	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades openssh-server zfsutils-linux ; do sleep 1; done;
-	case "$TOOL" in
-		incus)
-			until apt-get install -y incus ; do sleep 1; done;
-			;;
-		lxc)
-			snap install --classic lxd
-			# This is to prevent the LXD UI activating automatically if we ever use this
-			# server as an LXD remote (see "setup-as-remote.sh")
-			sudo snap set lxd ui.enable=false
-			;;
-	esac
-
+	# For now, if Incus is not found, we go with LXD.
+	# NOTE: This might change later.
+	if ! type -p incus; then
+		snap install --classic lxd
+		# This is to prevent the LXD UI activating automatically if we ever use this
+		# server as an LXD remote (see "setup-as-remote.sh")
+		sudo snap set lxd ui.enable=false
+	fi
 fi
+
+# Detect what we have (LXD or Incus)
+source detect.sh
 
 ########################################
 # Unix users
@@ -137,6 +135,8 @@ fi
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
 # Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
+# Bridge device
+BRIDGE="$($TOOL profile device get default eth0 network)"
 # Get $TOOL's dnsmasq IP
 DNSIP="$($TOOL network get $BRIDGE ipv4.address)"
 # Strip netmask

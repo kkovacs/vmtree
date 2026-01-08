@@ -17,6 +17,3 @@ else
 	echo "Neither lxc or incus is available!" >&2
 	exit 1
 fi
-
-# Bridge device
-BRIDGE="$($TOOL profile device get default eth0 network)"
