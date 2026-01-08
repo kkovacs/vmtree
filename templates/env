@@ -2,6 +2,20 @@
 # Example: DOMAIN="example.com"
 DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 
+# INCUS
+TOOL=incus
+TOOLADMIN="incus admin"
+GROUPS=incus,incus-admin
+BRIDGE=incusbr0
+# If used LXD-TO-INCUS:
+#BRIDGE=lxdbr0
+
+# LXD
+#TOOL=lxc
+#TOOLADMIN=lxd
+#GROUPS=lxd
+#BRIDGE=lxdbr0
+
 # Automatic HTTP authentication. Password will be hashed automatically.
 AUTHUSER="${AUTHUSER:-vmtree}"
 AUTHPASS="${AUTHPASS:-$RANDOM}"
