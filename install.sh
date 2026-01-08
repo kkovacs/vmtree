@@ -44,6 +44,7 @@ fi
 
 # Configuration
 source .env
+source detect.sh
 
 # Do we know our domain already? (From the .env file, usually)
 if [[ -z "$DOMAIN" ]]; then
@@ -86,7 +87,7 @@ if [[ ! -f /usr/bin/caddy || ! -f /usr/bin/$TOOL ]]; then
 		incus)
 			until apt-get install -y incus ; do sleep 1; done;
 			;;
-		lxd)
+		lxc)
 			snap install --classic lxd
 			# This is to prevent the LXD UI activating automatically if we ever use this
 			# server as an LXD remote (see "setup-as-remote.sh")
@@ -116,7 +117,7 @@ fi
 install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
 
 ########################################
-# LXD Linux containers
+# Linux containers
 ########################################
 
 # Initialize $TOOLADMIN only if not initialized
@@ -154,7 +155,7 @@ if networkctl | grep $BRIDGE.*unmanaged; then
 			sudo systemctl daemon-reload
 			sudo systemctl restart incus
 			;;
-		lxd)
+		lxc)
 			snap restart lxd
 			;;
 	esac

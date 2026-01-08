@@ -5,6 +5,7 @@ cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
+source detect.sh
 
 # Cron doesn't have this in PATH
 export PATH="$PATH:/snap/bin"

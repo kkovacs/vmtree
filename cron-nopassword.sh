@@ -5,6 +5,7 @@ cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
+source detect.sh
 
 # Location of file to use
 FILE=/etc/caddy/nopasswd-hosts

@@ -5,6 +5,7 @@ cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
+source detect.sh
 
 # Run what acme.sh would put in cron
 /root/.acme.sh/acme.sh --cron --home "/root/.acme.sh"

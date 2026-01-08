@@ -20,6 +20,7 @@ set -e
 cd "$(dirname "$0")" || exit
 # Configuration
 source .env
+source detect.sh
 
 # Incus requires a name for the trust
 if [ $# -lt 1 ]; then

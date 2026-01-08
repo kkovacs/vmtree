@@ -8,6 +8,7 @@ cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
+source detect.sh
 
 # Script's first parameter is ssh pubkey name (username)
 SSHUSER="$1"
@@ -60,9 +61,17 @@ fi
 
 # Images
 declare -A images
-# Best:
-images["ubuntu2404"]="images:ubuntu/noble/cloud"   # Works 100%
-images["ubuntu2204"]="images:ubuntu/jammy/cloud"   # Works 100%
+# Best (Works 100%):
+case "$TOOL" in
+	incus)
+		images["ubuntu2404"]="images:ubuntu/noble/cloud"
+		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
+		;;
+	lxc)
+		images["ubuntu2404"]="ubuntu:22.04"
+		images["ubuntu2204"]="ubuntu:24.04"
+	;;
+esac
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
