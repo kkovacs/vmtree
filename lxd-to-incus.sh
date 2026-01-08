@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# XXX
+printf "\nWARNING! THIS TOOL DOES NOT WORK FOR ME YET. IT SHOULD, BUT IT DOESN'T. FREEZES AT INCUS'S OWN SCRIPT.\n\n"
+
 read -p "This tool is used to migrate an LXD-based VMTREE to Incus. Is this what you want to do? (Type 'yes'): "
 if [[ $REPLY != 'yes' ]]; then
 	exit
