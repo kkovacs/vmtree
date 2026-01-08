@@ -5,7 +5,7 @@ DOMAIN="$(curl -4 https://ip.me/ | tr "." "-").nip.io"
 # INCUS
 TOOL=incus
 TOOLADMIN="incus admin"
-GROUPS=incus,incus-admin
+GROUPS=incus-admin
 BRIDGE=incusbr0
 # If used LXD-TO-INCUS:
 #BRIDGE=lxdbr0
