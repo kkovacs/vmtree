@@ -24,8 +24,8 @@ fi
 
 # Ensure correct host OS
 source /etc/os-release
-if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "22.04" ]]; then
-	echo "ERROR: Please install on Ubuntu 24.04 or 22.04!"
+if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "26.04" ]]; then
+	echo "ERROR: Please install on Ubuntu 24.04 or 26.04!"
 	exit 1
 fi
 
@@ -69,6 +69,33 @@ install -o root -g root -m 755 -d /vmtree/keys
 install -o root -g root -m 750 -d /vmtree/log
 
 ########################################
+# Caddy reverse proxy
+########################################
+
+# Set up Caddy repos
+if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+	until apt-get update; do sleep 1; done
+fi
+
+# Install.
+if [[ ! -f /usr/bin/caddy ]]; then
+	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades openssh-server zfsutils-linux ; do sleep 1; done;
+	# For now, if Incus is not found, we go with LXD.
+	# NOTE: This might change later.
+	if ! type -p incus; then
+		snap install --classic lxd
+		# This is to prevent the LXD UI activating automatically if we ever use this
+		# server as an LXD remote (see "setup-as-remote.sh")
+		sudo snap set lxd ui.enable=false
+	fi
+fi
+
+# Detect what we have (LXD or Incus)
+source detect.sh
+
+########################################
 # Unix users
 ########################################
 
@@ -80,7 +107,7 @@ chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directo
 # Create vmtree unix user
 if [[ ! -d "/home/vmtree" ]]; then
 	adduser --disabled-password --gecos "" "vmtree"
-	usermod -G lxd "vmtree"
+	usermod -G $TOOLGROUP "vmtree"
 	# Ensure directory
 	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
 fi
@@ -88,70 +115,51 @@ fi
 install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
 
 ########################################
-# Caddy reverse proxy
+# Linux containers
 ########################################
 
-# Set up Caddy repos
-if [[ ! -f /usr/share/keyrings/caddy-stable-archive-keyring.gpg ]]; then
-	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
-	curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
-	until apt-get update; do sleep 1; done
-fi
-
-# Install
-if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy less man less psmisc screen htop curl wget bash-completion dnsutils git tig socat rsync zip unzip vim-nox unattended-upgrades snapd openssh-server zfsutils-linux ; do sleep 1; done;
-fi
-
-########################################
-# LXD Linux containers
-########################################
-
-# Install LXD if not installed
-if ! type lxd; then
-	snap install --classic lxd
-fi
-
-# Initialize lxd only if not initialized
-if ! lxc storage show default; then
+# Initialize $TOOLADMIN only if not initialized
+if ! $TOOL storage show default; then
 	# If ZFS_DISK is defined...
 	if [[ -n "$ZFS_DISK" ]]; then
 		# initialize with the "zfs" storage driver
-		lxd init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
+		$TOOLADMIN init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
 	else
 		# or else, initialize with default (usually "dir") storage driver
-		lxd init --auto
+		$TOOLADMIN init --auto
 	fi
-	# This is to prevent the LXD UI activating automatically if we ever use
-	# this server as an LXD remote (see "lxd-setup-as-remote.sh")
-	sudo snap set lxd ui.enable=false
-	# To increase performance (because rsync seems CPU-bound) if we ever "lxc copy ..."
-	lxc storage set default rsync.compression false
+	# To increase performance (because rsync seems CPU-bound) if we ever "$TOOL copy ..."
+	$TOOL storage set default rsync.compression false
 fi
 
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
 # Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
-# Get lxd's dnsmasq IP
-DNSIP="$(lxc network get lxdbr0 ipv4.address)"
+# Bridge device
+BRIDGE="$($TOOL profile device get default eth0 network)"
+# Get $TOOL's dnsmasq IP
+DNSIP="$($TOOL network get $BRIDGE ipv4.address)"
 # Strip netmask
 DNSIP="${DNSIP%/*}"
 # Create the systemd network file to handle DNS
-_template templates/lxdbr0.network /etc/systemd/network/lxdbr0.network
+_template templates/BRIDGE.network /etc/systemd/network/$BRIDGE.network
 
 # Reload systemd networking, so the above change get applied
 # XXX Ugly workaround, see https://github.com/canonical/lxd/issues/14588
-if networkctl | grep lxdbr0.*unmanaged; then
-	# Restart LXD to correctly apply network settings
+if networkctl | grep $BRIDGE.*unmanaged; then
+	# Restart to correctly apply network settings
 	sudo networkctl reload
-	snap restart lxd
+	# Unfortunately, restart is $TOOL dependent
+	case "$TOOL" in
+		incus)
+			sudo systemctl daemon-reload
+			sudo systemctl restart incus
+			;;
+		lxc)
+			snap restart lxd
+			;;
+	esac
 fi
-
-# XXX Remove this after a transitory period
-# Stop the OLD service, now and forever. Ignore error if it was already removed.
-sudo systemctl disable --now lxd-dns-lxdbr0 || true
-rm /etc/systemd/system/lxd-dns-lxdbr0.service || true
-sudo systemctl daemon-reload
 
 ########################################
 # Creating /persist/ disks
@@ -188,9 +196,9 @@ done
 
 # Should only do on ZFS, snapshots are too expensice on "dir" storage backend
 if [[ -n "$ZFS_DISK" && -n "$SNAPSHOT_EXPIRY" ]]; then
-	lxc profile set default snapshots.expiry "${SNAPSHOT_EXPIRY:-7d}"
-	lxc profile set default snapshots.schedule "15 4 * * *" # A few minutes BEFORE cron-stop.sh (see below)
-	lxc profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
+	$TOOL profile set default snapshots.expiry "${SNAPSHOT_EXPIRY:-7d}"
+	$TOOL profile set default snapshots.schedule "15 4 * * *" # A few minutes BEFORE cron-stop.sh (see below)
+	$TOOL profile set default snapshots.pattern 'snapshot-{{creation_date.Format("20060102")}}-%d' # Golang date format
 fi
 
 ########################################

@@ -5,6 +5,7 @@ cd "$(dirname "$0")" || exit
 
 # Source env
 source .env
+source detect.sh
 
 # Location of file to use
 FILE=/etc/caddy/nopasswd-hosts
@@ -19,8 +20,8 @@ CHECKSUM1=$(sha256sum "$FILE" | awk '{print $1}')
 echo "[\"placeholder-httpnoauth.${DOMAIN}\"" >"$FILE"
 
 # Find marker file
-for VM in $(lxc list --format csv --columns n); do
-	if lxc file pull "$VM/nopassword" - 2>/dev/null ; then
+for VM in $($TOOL list --format csv --columns n); do
+	if $TOOL file pull "$VM/nopassword" - 2>/dev/null ; then
 		echo ",\"${VM}.${DOMAIN}\"" >>"$FILE"
 	fi
 done
