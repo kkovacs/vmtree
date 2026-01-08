@@ -69,25 +69,6 @@ install -o root -g root -m 755 -d /vmtree/keys
 install -o root -g root -m 750 -d /vmtree/log
 
 ########################################
-# Unix users
-########################################
-
-# Ensure permissions on ssh pubkeys
-# (When copied, they tend to be 600, but they are public after all,
-# and the vmtree-vm.sh script needs to read them.)
-chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."; exit 1; }
-
-# Create vmtree unix user
-if [[ ! -d "/home/vmtree" ]]; then
-	adduser --disabled-password --gecos "" "vmtree"
-	usermod -G $GROUPS "vmtree"
-	# Ensure directory
-	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
-fi
-# Clear ssh pubkey file for filling up
-install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
-
-########################################
 # Caddy reverse proxy
 ########################################
 
@@ -114,6 +95,25 @@ if [[ ! -f /usr/bin/caddy || ! -f /usr/bin/$TOOL ]]; then
 	esac
 
 fi
+
+########################################
+# Unix users
+########################################
+
+# Ensure permissions on ssh pubkeys
+# (When copied, they tend to be 600, but they are public after all,
+# and the vmtree-vm.sh script needs to read them.)
+chmod 644 keys/* || { echo "ERROR: No ssh public keys found in the keys/ directory! Nobody could ssh into the VMs."; exit 1; }
+
+# Create vmtree unix user
+if [[ ! -d "/home/vmtree" ]]; then
+	adduser --disabled-password --gecos "" "vmtree"
+	usermod -G $GROUPS "vmtree"
+	# Ensure directory
+	install -o "vmtree" -g "vmtree" -m 700 -d "/home/vmtree/.ssh"
+fi
+# Clear ssh pubkey file for filling up
+install -o "vmtree" -g "vmtree" -m 700 /dev/null /home/vmtree/.ssh/authorized_keys
 
 ########################################
 # LXD Linux containers
