@@ -25,7 +25,7 @@ unset SAVEIFS
 # One word vmname or more?
 if [[ ${#PARTS[@]} -eq 1 ]]; then
 	# One word vm name is a special case. We never try to launch it, just connect -- if the SSH key is in.
-	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `incus rename`.
+	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `$TOOL rename`.
 	REQUSER=""
 	REQVM="${PARTS[0]}"
 	REQIMAGE="${DEFAULTIMAGE:-ubuntu2404}"
@@ -55,7 +55,7 @@ else
 	DISKPATH="/vmtree/disks/$DISK"
 
 	echo "Just FYI - you have the following VMs here:" >&2
-	incus list -c nst4,image.release,mcl "^${REQUSER}-" >&2
+	$TOOL list -c nst4,image.release,mcl "^${REQUSER}-" >&2
 fi
 
 # Images
@@ -88,7 +88,7 @@ IMAGE="${images[$REQIMAGE]}"
 # Show info
 printf "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK\n\nThis VM's port 80 is: https://$VM.$DOMAIN/ ( $AUTHUSER / $AUTHPASS )\n\n" >&2
 
-# Default incus options
+# Default $TOOL options
 OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_tables,ip6_tables,netlink_diag,br_netfilter,xt_conntrack,nf_conntrack,ip_vs,vxlan")
 
 # REAL VM (as opposed to container) mode
@@ -110,7 +110,7 @@ cat >&2 <templates/motd
 echo >&2 # empty line
 
 # Does the VM exists?
-if ! incus info "$VM" >/dev/null 2>&1 ; then
+if ! $TOOL info "$VM" >/dev/null 2>&1 ; then
 	# Sanity check
 	if [[ "$REQUSER" != "$SSHUSER" && "$REQUSER" != "demo" ]]; then
 		echo "ERROR: you can only start VMs called $SSHUSER-xxx and demo-xxx" >&2
@@ -118,15 +118,15 @@ if ! incus info "$VM" >/dev/null 2>&1 ; then
 	fi
 	# launch docker-capable vm
 	echo "Initializing" >&2
-	incus init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
+	$TOOL init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
 	# Mount disk if exists
 	if [[ -d "$DISKPATH" ]]; then
 		echo "Attaching disks/$DISK" >&2
-		incus config device add "$VM" "$DISK" disk "source=$DISKPATH" "path=/persist" >&2
+		$TOOL config device add "$VM" "$DISK" disk "source=$DISKPATH" "path=/persist" >&2
 	fi
 	echo "Cloud-config" >&2
 	# Apply cloud-config
-	incus config set "$VM" user.user-data - >&2 <<EOF
+	$TOOL config set "$VM" user.user-data - >&2 <<EOF
 #cloud-config
 users:
 - name: user
@@ -181,19 +181,19 @@ EOF
 fi
 
 echo "Starting" >&2
-incus start "$VM" >/dev/null >&2
+$TOOL start "$VM" >/dev/null >&2
 
 # Waiting for IP, for SSH port to open, and for '/run/nologin' to go away
 echo -n "Waiting for ready" >&2
-until (echo >"/dev/tcp/$VM.incus/22") 2>/dev/null && ! incus file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
+until (echo >"/dev/tcp/$VM.$LOCAL/22") 2>/dev/null && ! $TOOL file pull "$VM/run/nologin" - >/dev/null 2>/dev/null; do
         echo -n "." >&2
         sleep 1
 done
 
 # Display IP
-IPS="$(incus list --format csv -c 4 "^${VM}$")"
+IPS="$($TOOL list --format csv -c 4 "^${VM}$")"
 echo " IPs: $IPS" >&2
 
 # stdio fwd
 echo "Connecting" >&2
-nc "${VM}.incus" 22
+nc "${VM}.$LOCAL" 22

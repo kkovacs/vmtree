@@ -10,11 +10,11 @@ source .env
 export PATH="$PATH:/snap/bin"
 
 # Find marker file
-for VM in $(incus list --format csv --columns n); do
-	if incus file pull "$VM/snapshotme" - 2>/dev/null ; then
+for VM in $($TOOL list --format csv --columns n); do
+	if $TOOL file pull "$VM/snapshotme" - 2>/dev/null ; then
 		echo "Snapshotme snapshotting $VM";
-		incus snapshot "$VM"
+		$TOOL snapshot "$VM"
 		# Remove file to indicate snapshot has been done
-		incus file delete "$VM/snapshotme" 2>/dev/null
+		$TOOL file delete "$VM/snapshotme" 2>/dev/null
 	fi
 done

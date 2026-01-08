@@ -14,10 +14,10 @@ $([[ $ACME_DNS != "selfsigned" ]] || echo "#")        tls /etc/caddy/vmtree.crt 
 
         # Export a different HTTP port on a different subdomain, to use with vscode or similar.
         #@code header_regexp domain Host "^code-([-a-z0-9]+)\."
-        #reverse_proxy @code to "{re.domain.1}.incus:1337"
+        #reverse_proxy @code to "{re.domain.1}.${LOCAL}:1337"
 
         reverse_proxy {
-                to "{http.request.host.labels.$(echo ${DOMAIN//[!.]/} | wc -c)}.incus:80"
+                to "{http.request.host.labels.$(echo ${DOMAIN//[!.]/} | wc -c)}.${LOCAL}:80"
         }
 }
 ${caddyfile_local:-}
