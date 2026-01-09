@@ -68,8 +68,8 @@ case "$TOOL" in
 		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
 		;;
 	lxc)
-		images["ubuntu2404"]="ubuntu:22.04"
-		images["ubuntu2204"]="ubuntu:24.04"
+		images["ubuntu2404"]="ubuntu:24.04"
+		images["ubuntu2204"]="ubuntu:22.04"
 	;;
 esac
 # Others:
