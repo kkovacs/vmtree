@@ -24,8 +24,8 @@ fi
 
 # Ensure correct host OS
 source /etc/os-release
-if [[ "$VERSION_ID" != "24.04" && "$VERSION_ID" != "26.04" ]]; then
-	echo "ERROR: Please install on Ubuntu 24.04 or 26.04!"
+if [[ "$VERSION_ID" != "22.04" && "$VERSION_ID" != "24.04"  && "$VERSION_ID" != "26.04" ]]; then
+	echo "ERROR: Please install on a recent Ubuntu! Your version: $VERSION_ID"
 	exit 1
 fi
 
@@ -85,7 +85,7 @@ if [[ ! -f /usr/bin/caddy ]]; then
 	# For now, if Incus is not found, we go with LXD.
 	# NOTE: This might change later.
 	if ! type -p incus; then
-		snap install --classic lxd
+		snap install --classic lxd --channel=6/stable
 		# This is to prevent the LXD UI activating automatically if we ever use this
 		# server as an LXD remote (see "setup-as-remote.sh")
 		sudo snap set lxd ui.enable=false
@@ -123,6 +123,7 @@ if ! $TOOL storage show default; then
 	# If ZFS_DISK is defined...
 	if [[ -n "$ZFS_DISK" ]]; then
 		# initialize with the "zfs" storage driver
+		# NOTE: Encrypted zpool example: "zpool create -O encryption=on -O keyformat=passphrase default $ZFS_DISK"
 		$TOOLADMIN init --auto --storage-backend zfs --storage-create-device "$ZFS_DISK"
 	else
 		# or else, initialize with default (usually "dir") storage driver
