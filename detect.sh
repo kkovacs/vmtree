@@ -7,7 +7,7 @@ if [[ -x /usr/bin/incus ]]; then
 	TOOLADMIN="incus admin"
 	TOOLGROUP="incus-admin"
 	LOCALDOMAIN=incus
-elif [[ -x /usr/sbin/lxc ]]; then
+elif [[ -x /snap/bin/lxc || -x /usr/sbin/lxc ]]; then
 	echo "LXD detected" >&2
 	TOOL=lxc
 	TOOLADMIN=lxd
