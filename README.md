@@ -97,5 +97,7 @@ This basic setup will use [ip.me](https://ip.me/), [nip.io](https://nip.io/), an
    - your desired automatic HTTP AUTH username / password
    - your DNS provider and its token to use with acme.sh
    - optionally, a storage disk/partition (will be formatted with ZFS)
+1. If you want to use Incus instead of Canonical's LXD, `apt-get install incus` now.
+2. If you need deeper customization (complicated ZFS setup, etc), do it now, then install and configure LXD.
 1. Run `sudo /vmtree/install.sh` again to finish the installation.
 1. Distribute the snippet it prints out to your team, to put into their `.ssh/config` files.
