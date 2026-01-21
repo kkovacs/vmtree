@@ -34,6 +34,9 @@ CHECKSUM2=$(sha256sum "$FILE" | awk '{print $1}')
 
 # Was there a change in the JSON file?
 if [[ "$CHECKSUM1" != "$CHECKSUM2" ]]; then
+	# In case the Caddyfile was extended with other domains, we need to find which one is "ours".
+	# Logic: Convert array to entries -> select the one where the deep structure contains our string -> return the key (index)
+	ROUTE_INDEX=$(curl -s http://127.0.0.1:2019/config/apps/http/servers/srv0/routes | jq -r "to_entries[] | select(.value.handle[0].routes[0].match[0].not[0].host[]? | contains(\"placeholder-httpnoauth\")) | .key")
 	# Commit change to Caddyserver
-	curl -X PATCH -d @/etc/caddy/nopasswd-hosts -H "Content-Type: application/json" http://127.0.0.1:2019/config/apps/http/servers/srv0/routes/0/handle/0/routes/0/match/0/not/0/host
+	curl -X PATCH -d @/etc/caddy/nopasswd-hosts -H "Content-Type: application/json" http://127.0.0.1:2019/config/apps/http/servers/srv0/routes/$ROUTE_INDEX/handle/0/routes/0/match/0/not/0/host
 fi
