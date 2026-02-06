@@ -158,10 +158,11 @@ packages:
 - socat
 - tig
 - unattended-upgrades
+- zip
 - unzip
 - vim-nox
 - wget
-- zip
+- jq
 write_files:
 - path: /etc/motd
   content: |
