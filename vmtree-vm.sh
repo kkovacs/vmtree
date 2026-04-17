@@ -164,7 +164,6 @@ packages:
 - unzip
 - vim-nox
 - wget
-- zip
 write_files:
 - path: /etc/motd
   content: |
