@@ -151,7 +151,9 @@ packages:
 - curl
 - dnsutils
 - git
+- gron
 - htop
+- jq
 - less
 - openssh-server
 - psmisc
@@ -159,12 +161,10 @@ packages:
 - socat
 - tig
 - unattended-upgrades
-- zip
 - unzip
 - vim-nox
 - wget
-- jq
-- gron
+- zip
 write_files:
 - path: /etc/motd
   content: |
