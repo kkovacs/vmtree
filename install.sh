@@ -81,7 +81,7 @@ fi
 
 # Install.
 if [[ ! -f /usr/bin/caddy ]]; then
-	until apt-get install -y caddy man less psmisc screen htop curl wget jq bash-completion dnsutils git tig socat rsync unzip jq vim-nox unattended-upgrades openssh-server zfsutils-linux ; do sleep 1; done;
+	until apt-get install -y caddy man less psmisc htop curl wget bash-completion dnsutils git tig socat rsync unzip jq gron vim-nox unattended-upgrades openssh-server zfsutils-linux ; do sleep 1; done;
 	# For now, if Incus is not found, we go with LXD.
 	# NOTE: This might change later.
 	if ! type -p incus; then

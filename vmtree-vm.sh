@@ -68,6 +68,7 @@ case "$TOOL" in
 		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
 		;;
 	lxc)
+		images["ubuntu2604"]="ubuntu:26.04"
 		images["ubuntu2510"]="ubuntu:25.10"
 		images["ubuntu2404"]="ubuntu:24.04"
 		images["ubuntu2204"]="ubuntu:22.04"
@@ -155,7 +156,6 @@ packages:
 - openssh-server
 - psmisc
 - rsync
-- screen
 - socat
 - tig
 - unattended-upgrades
@@ -164,6 +164,7 @@ packages:
 - vim-nox
 - wget
 - jq
+- gron
 write_files:
 - path: /etc/motd
   content: |
