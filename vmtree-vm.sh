@@ -29,7 +29,7 @@ if [[ ${#PARTS[@]} -eq 1 ]]; then
 	# One useful way to create one-word VMs is by starting them as `demo-vmname`, then using `$TOOL rename`.
 	REQUSER=""
 	REQVM="${PARTS[0]}"
-	REQIMAGE="${DEFAULTIMAGE:-ubuntu2404}"
+	REQIMAGE="${DEFAULTIMAGE:-ubuntu2604}"
 	REQETC=""
 	VM="$REQVM"
 	DISKPATH="/dev/null" # Won't count since we never launch, but anyway
@@ -38,7 +38,7 @@ else
 	# Friendlier variable
 	REQUSER="${PARTS[0]}"
 	REQVM="${PARTS[1]}"
-	REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2404}}"
+	REQIMAGE="${PARTS[2]:-${DEFAULTIMAGE:-ubuntu2604}}"
 	REQETC="${PARTS[3]}"
 	# Force "prefix-" to VM, but let anyone use "demo"
 	if [[ "$REQUSER" == "demo" ]]; then
@@ -64,6 +64,7 @@ declare -A images
 # Best (Works 100%):
 case "$TOOL" in
 	incus)
+		images["ubuntu2604"]="images:ubuntu/resolute/cloud"
 		images["ubuntu2404"]="images:ubuntu/noble/cloud"
 		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
 		;;
