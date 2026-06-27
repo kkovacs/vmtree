@@ -188,6 +188,8 @@ bootcmd:
 runcmd:
 # XXX Next 1 line is part of the workaround for https://github.com/canonical/lxd/issues/13389
 - [ "systemctl", "reload", "apparmor.service" ]
+# If /persist/autoexec.sh exist, run it with user permissions
+- "if [ -x /persist/autoexec.sh ] ; then su - user -s /bin/bash -c /persist/autoexec.sh ; fi"
 EOF
 
 fi
