@@ -35,6 +35,7 @@ For the VMs, it uses [LXD/Incus containers](https://canonical.com/lxd) or [QEMU 
 - The directory `/persist/` is shared between a user's all personal VMs. (Makes working on multiple VMs easy, even at the same time.)
 - VMs are considered ephemeral: by default all VMs "die" at night, to protect resources from forgetful humans. (Can be disabled on a per-VM basis by `sudo touch /nokill`.)
 - But files in `/persist/` are persistent and survive the nightly killing of VMs. (So it's recommended to keep your work there.)
+- If `/persist/autoexec.sh` (`chmod 755`) exists, it will be run with user permissions right after boot. (For multiple environments, we recommend detecting `$HOSTNAME`.)
 - LXD/Incus containers are pre-configured to be `docker`-compatible.
 - By default VMs are running Ubuntu, but you can request different OSes just by provisioning the VM like this: `ssh demo-foo-centos8.example.com` (Then on you can use just `demo-foo.example.com`.)
 - Personal VMs are protected from other users, but can still be shared if a teammate's SSH key is put in `/home/user/.ssh/authorized_keys` by the VM's owner.
