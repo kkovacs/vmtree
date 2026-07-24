@@ -184,7 +184,10 @@ for user in keys/*; do
 	user="${user##*/}"
 	# Make disk
 	DISKPATH="/vmtree/disks/${user}"
-	install -o 1001000 -g 1001000 -d "$DISKPATH"
+	# XXX regression from uutils, https://github.com/uutils/coreutils/issues/7879
+	#install -o 1001000 -g 1001000 -d "$DISKPATH"
+	mkdir "$DISKPATH" || true
+	chown 1001000:1001000 "$DISKPATH"
 	# Add restricted key(s)
 	for pubkey in "${pubkeys[@]}"; do
 		echo "command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
@@ -253,6 +256,8 @@ fs.inotify.max_user_instances=10240
 fs.inotify.max_user_watches=655360
 EOF
 # Reload sysctl
+# XXX Ubuntu 26.04, how could this NOT exist? (sysctl -p gives error)
+if [[ ! -e /etc/sysctl.conf ]]; then touch /etc/sysctl.conf; fi
 sysctl -p
 
 # Set up crontab
