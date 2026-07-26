@@ -14,7 +14,10 @@ export PATH="$PATH:/snap/bin"
 for VM in $($TOOL list --format csv --columns n); do
 	if $TOOL file pull "$VM/snapshotme" - 2>/dev/null ; then
 		echo "Snapshotme snapshotting $VM";
-		$TOOL snapshot "$VM"
+		case "$TOOL" in
+			incus) $TOOL snapshot create "$VM" ;;
+			lxc)   $TOOL snapshot "$VM" ;;
+		esac
 		# Remove file to indicate snapshot has been done
 		$TOOL file delete "$VM/snapshotme" 2>/dev/null
 	fi
