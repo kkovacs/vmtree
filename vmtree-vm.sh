@@ -108,6 +108,8 @@ OPTS=("-c" "security.nesting=true" "-c" "linux.kernel_modules=overlay,nf_nat,ip_
 if [[ "$REQETC" = "vm"* ]]; then
 	# This changes EVERYTHING (in OPTS)
 	OPTS=( "--vm")
+	# Shift VM user uid to match container subuid mapping (host uid 1001000)
+	IS_VM=1
 	# Set limits, if given. Enforce format
 	LIMIT="${REQETC#vm}"
 	# Allow only ONE DIGIT (and only a digit, preventing overuse and injection)
@@ -142,6 +144,7 @@ if ! $TOOL info "$VM" >/dev/null 2>&1 ; then
 #cloud-config
 users:
 - name: user
+  ${IS_VM:+uid: 1001000}
   ssh_authorized_keys:
 $(for pubkey in "${PUBKEYS[@]}"; do echo "  - ${pubkey}"; done)
   shell: /bin/bash
