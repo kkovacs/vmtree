@@ -133,6 +133,19 @@ if ! $TOOL storage show default; then
 	$TOOL storage set default rsync.compression false
 fi
 
+########################################
+# Creating /persist/ disks
+########################################
+# if on ZFS, then create a volume for "/persist" disks in that
+if [[ -n "$ZFS_DISK" ]]; then
+	# only if it was not created yet
+	if ! mountpoint /vmtree/disks/; then
+		zfs create default/vmtree_disks -o mountpoint=/vmtree/disks
+		# XXX workaround: lxd init does not accept non-empty zpool, but does not pick up vmtree_disks in-process, so we need to restart it the first time.
+		LXD_RESTART=1
+	fi
+fi
+
 # Set up systemd-resolved,
 # to be able to reach VMs by name from the host machine.
 # Based on: https://linuxcontainers.org/lxd/docs/master/howto/network_bridge_resolved/
@@ -160,18 +173,6 @@ if networkctl | grep $BRIDGE.*unmanaged; then
 			snap restart lxd
 			;;
 	esac
-fi
-
-########################################
-# Creating /persist/ disks
-########################################
-
-# if on ZFS, then create a volume for "/persist" disks in that
-if [[ -n "$ZFS_DISK" ]]; then
-	# only if it was not created yet
-	if ! mountpoint /vmtree/disks/; then
-		zfs create default/vmtree_disks -o mountpoint=/vmtree/disks
-	fi
 fi
 
 # Add authorized_keys to vmtree user
@@ -271,6 +272,12 @@ crontab <<EOF
 * * * * * /vmtree/cron-nopassword.sh >/dev/null 2>&1
 $([[ $ACME_DNS == "selfsigned" ]] && echo "#")9 0 * * * /vmtree/cron-renew.sh
 EOF
+
+# XXX If ZFS was freshly created, restart LXD snap to pick up the new mount namespace
+if [[ -n "${LXD_RESTART:-}" && "$TOOL" == "lxc" ]]; then
+	echo "Restarting LXD to pick up ZFS mounts..."
+	snap disable lxd && snap enable lxd
+fi
 
 # Success
 printf "\nSUCCESS! vmtree had been set up!\n"
