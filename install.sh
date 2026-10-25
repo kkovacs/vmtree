@@ -191,7 +191,7 @@ for user in keys/*; do
 	chown 1001000:1001000 "$DISKPATH"
 	# Add restricted key(s)
 	for pubkey in "${pubkeys[@]}"; do
-		echo "command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
+		echo "restrict,command=\"/vmtree/vmtree-vm.sh $user \$SSH_ORIGINAL_COMMAND\" $pubkey" >>/home/vmtree/.ssh/authorized_keys
 	done
 done
 
