@@ -69,10 +69,10 @@ case "$TOOL" in
 		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
 		;;
 	lxc)
-		images["ubuntu2604"]="ubuntu:26.04"
-		images["ubuntu2510"]="ubuntu:25.10"
-		images["ubuntu2404"]="ubuntu:24.04"
-		images["ubuntu2204"]="ubuntu:22.04"
+		images["ubuntu2610"]="ubuntu-minimal-daily:26.10"
+		images["ubuntu2604"]="ubuntu-minimal-daily:26.04"
+		images["ubuntu2404"]="ubuntu-minimal-daily:24.04"
+		images["ubuntu2204"]="ubuntu-minimal-daily:22.04"
 	;;
 esac
 # Others:
@@ -156,17 +156,21 @@ package_update: true
 packages:
 - bash-completion
 - curl
-- dnsutils
+- bind9-dnsutils
 - git
 - gron
 - htop
 - jq
 - less
+- man-db
 - openssh-server
 - psmisc
 - rsync
+- screen
 - socat
+- sudo
 - tig
+- tmux
 - unattended-upgrades
 - unzip
 - vim-nox
@@ -192,8 +196,8 @@ write_files:
 bootcmd:
 - [ "sysctl", "-w", "net.ipv4.ip_unprivileged_port_start=0" ]
 runcmd:
-# XXX Next 1 line is part of the workaround for https://github.com/canonical/lxd/issues/13389
-- [ "systemctl", "reload", "apparmor.service" ]
+# Auto-upgrade security-related
+- [ "unattended-upgrade", "-v" ]
 # If /persist/autoexec.sh exist, run it with user permissions
 - "if [ -x /persist/autoexec.sh ] ; then su - user -s /bin/bash -c /persist/autoexec.sh ; fi"
 EOF
