@@ -3,6 +3,10 @@
 # Force location
 cd "$(dirname "$0")" || exit
 
+# One run at a time, cron or manual (an overlapping run would snapshot twice)
+exec 9>/run/vmtree-snapshotme.lock
+flock -n 9 || { echo "Another run is in progress, skipping" >&2; exit 0; }
+
 # Source env
 source .env
 source detect.sh

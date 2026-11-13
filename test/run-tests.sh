@@ -77,6 +77,17 @@ ssh_lxd() {
   timeout 180 "${sc[@]}" "$@"
 }
 
+# Poll until "$@" succeeds, failing after $1 seconds. Used for the every-minute
+# cron jobs: running them by hand races with the real cron.
+wait_for() {
+  local t=$1 i; shift
+  for ((i = 0; i < t; i += 5)); do
+    "$@" && return 0
+    sleep 5
+  done
+  return 1
+}
+
 # -- setup --
 setup() {
   # create droplet (or reuse existing)
@@ -162,7 +173,6 @@ SETENV
 test_caddy_active()      { ssh_host "systemctl is-active caddy"; }
 test_vmtree_user()       { ssh_host "id vmtree"; }
 test_storage_pool()      { ssh_host "$TOOL storage show default"; }
-test_force_command()     { ssh_host "grep -q 'command=' /home/vmtree/.ssh/authorized_keys"; }
 
 # The requested VM name is client input: anything but "word(-word)*" must be rejected.
 # (No '-x' case: ssh would parse it as its own option.)
@@ -174,6 +184,20 @@ test_invalid_vm_names() {
     out=$(timeout 30 ssh "${SSH_OPTS[@]}" "vmtree@$ip" "$name" 2>&1 </dev/null) || rc=$?
     [[ $rc -ne 0 && "$out" == *"invalid VM name"* ]] || { echo "NOT REJECTED: '$name' rc=$rc out=$out"; return 1; }
   done
+}
+
+# The forced command must win over: a real command that is also a valid VM name,
+# an interactive login, and the sftp subsystem (modern scp uses sftp too).
+test_force_command() {
+  local ip out rc
+  ip=$(get_ip)
+  rc=0; out=$(timeout 30 ssh "${SSH_OPTS[@]}" "vmtree@$ip" id 2>&1 </dev/null) || rc=$?
+  [[ $rc -ne 0 && "$out" != *"uid="* ]] || { echo "'id' RAN: rc=$rc out=$out"; return 1; }
+  # -T, not -tt: with -tt the CLIENT aborts on restrict's PTY refusal, never reaching the server side
+  rc=0; out=$(timeout 30 ssh -T "${SSH_OPTS[@]}" "vmtree@$ip" 2>&1 </dev/null) || rc=$?
+  [[ $rc -ne 0 && "$out" == *"invalid VM name"* ]] || { echo "LOGIN NOT BLOCKED: rc=$rc out=$out"; return 1; }
+  rc=0; out=$(echo ls | timeout 30 sftp -b - "${SSH_OPTS[@]}" "vmtree@$ip" 2>&1) || rc=$?
+  [[ $rc -ne 0 ]] || { echo "SFTP WORKS: out=$out"; return 1; }
 }
 
 # The outer vmtree@host session must NOT allow port forwarding to the host
@@ -243,10 +267,14 @@ test_vm_ping() {
 test_caddy_proxy() {
   ssh_host "$TOOL delete -f my-web1" 2>/dev/null || true
   ssh_lxd "user@my-web1${VM_SUFFIX}.${DOMAIN}" true
-  sleep 2
-  ssh_host "$TOOL exec my-web1 -- bash -c \"echo hello-vmtree > /tmp/test.txt && cd /tmp && nohup python3 -m http.server 80 >/dev/null 2>&1 &\""
-  sleep 2
-  curl -sk -u "testuser:testpass" "https://my-web1.${DOMAIN}/test.txt" | grep -q hello-vmtree
+  # http.server is left running on purpose: the next two caddy tests use it
+  ssh_host "$TOOL exec my-web1 -- bash -c \"echo hello-vmtree > /tmp/test.txt && cd /tmp && setsid nohup python3 -m http.server 80 >/dev/null 2>&1 </dev/null &\""
+  local i
+  for i in {1..30}; do
+    curl -sk -u "testuser:testpass" "https://my-web1.${DOMAIN}/test.txt" | grep -q hello-vmtree && return 0
+    sleep 1
+  done
+  return 1
 }
 
 test_caddy_auth_required() {
@@ -255,9 +283,7 @@ test_caddy_auth_required() {
 
 test_caddy_nopassword() {
   ssh_host "$TOOL exec my-web1 -- sudo touch /nopassword"
-  ssh_host 'cd /vmtree && bash cron-nopassword.sh'
-  sleep 1
-  curl -sk -o /dev/null -w '%{http_code}' "https://my-web1.${DOMAIN}/test.txt" | grep -q 200
+  wait_for 90 bash -c "curl -sk -o /dev/null -w '%{http_code}' 'https://my-web1.${DOMAIN}/test.txt' | grep -q 200"
 }
 
 test_persist_survives() {
@@ -281,9 +307,8 @@ test_killme() {
   ssh_lxd "user@my-kill1${VM_SUFFIX}.${DOMAIN}" true
   sleep 3
   ssh_host "$TOOL exec my-kill1 -- sudo touch /killme"
-  sleep 2
-  ssh_host 'cd /vmtree && bash cron-killme.sh'
-  ! ssh_host "$TOOL info my-kill1 >/dev/null 2>&1"
+  # Negate REMOTELY: a local "!" would turn an ssh failure (255) into a pass
+  wait_for 90 ssh_host "! $TOOL info my-kill1 >/dev/null 2>&1"
 }
 
 # Re-running install.sh must not disrupt existing VMs.
@@ -297,32 +322,22 @@ test_idempotent() {
 # Touch /snapshotme inside a container, run cron-snapshotme.sh, verify snapshot
 # XXX: cron-snapshotme.sh sporadically hangs on Ubuntu 26.04 (auto-named
 # snapshots trigger a daemon bug where the ZFS snapshot + DB entry are
-# created but the client never gets a response). Run async and poll.
+# created but the client never gets a response). The crontab's "timeout 600"
+# frees the lock; the marker then stays, so the next run snapshots again.
 test_snapshotme() {
   ssh_host "$TOOL delete -f my-snap1" 2>/dev/null || true
   ssh_lxd "user@my-snap1${VM_SUFFIX}.${DOMAIN}" true
   sleep 2
   ssh_host "$TOOL exec my-snap1 -- sudo touch /snapshotme"
-  sleep 1
-  ssh_host "cd /vmtree && { bash cron-snapshotme.sh &>/dev/null & }"
-  # Poll for snapshot to appear (max 120s)
-  for _ in $(seq 1 24); do
-    if ssh_host "$TOOL info my-snap1 | awk '/^Snapshots:/{getline; print; exit}' | grep -q ." 2>/dev/null; then
-      break
-    fi
-    sleep 5
-  done
-  # marker file consumed by cron
-  ssh_host "! $TOOL file pull my-snap1/snapshotme - 2>/dev/null"
-  # snapshot exists
-  ssh_host "$TOOL info my-snap1 | awk '/^Snapshots:/{getline; print; exit}' | grep -q ."
+  # Snapshot exists AND marker consumed (the script deletes it after snapshotting)
+  wait_for 150 ssh_host "$TOOL info my-snap1 | awk '/^Snapshots:/{getline; print; exit}' | grep -q . && ! $TOOL file pull my-snap1/snapshotme - >/dev/null 2>&1"
   ssh_host "$TOOL delete -f my-snap1" 2>/dev/null || true
 }
 
 # Launch a VM (not container) via the -vm suffix, verify it boots.
 # XXX: Works but eats ~1GB RAM; only runs when VM= (container mode).
 test_vm_machine() {
-  local vm_suf="-ubuntu${OS}04-vm1"
+  local vm_suf="-ubuntu${OS}04-vm1" out
   ssh_host "$TOOL delete -f my-vm1" 2>/dev/null || true
   out=$(ssh_lxd "user@my-vm1${vm_suf}.${DOMAIN}" 'echo VM-OK')
   [[ "$out" == *"VM-OK"* ]]
@@ -341,12 +356,19 @@ test_nokill() {
   ssh_host "$TOOL exec my-safe1 -- sudo touch /nokill"
   ssh_host 'cd /vmtree && bash cron-stop.sh'
   # safe1 stopped but exists
-  ssh_host "$TOOL info my-safe1 >/dev/null"
-  # gone1 deleted
-  ! ssh_host "$TOOL info my-gone1 >/dev/null 2>&1"
+  ssh_host "$TOOL list --format csv -c ns | grep -q '^my-safe1,STOPPED$'"
+  # gone1 deleted (negated remotely: a local "!" is ignored by set -e when not last)
+  ssh_host "! $TOOL info my-gone1 >/dev/null 2>&1"
   ssh_host "$TOOL delete -f my-safe1" 2>/dev/null || true
 }
-test_cron()           { ssh_host "crontab -l 2>/dev/null | grep -q cron-killme"; } # Not necessary.
+
+# All active cron jobs from install.sh (cron-renew is commented out for selfsigned)
+test_cron() {
+  local c
+  for c in stop killme snapshotme nopassword; do
+    ssh_host "crontab -l | grep -q '^[^#].*/vmtree/cron-$c\.sh'"
+  done
+}
 
 # -- run --
 if [[ $# -gt 0 ]]; then
@@ -358,8 +380,8 @@ else
   test_caddy_active
   test_vmtree_user
   test_storage_pool
-  test_force_command
   test_invalid_vm_names
+  test_force_command
   test_create_vm
   test_vm_running
   test_no_host_forwarding
