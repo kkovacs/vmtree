@@ -336,6 +336,7 @@ test_snapshotme() {
 
 # Launch a VM (not container) via the -vm suffix, verify it boots.
 # XXX: Works but eats ~1GB RAM; only runs when VM= (container mode).
+# XXX Fails on OS=24 TECH=incus: Ubuntu 24.04's incus pkg doesn't pull in QEMU (needs: qemu-system-x86 ovmf)
 test_vm_machine() {
   local vm_suf="-ubuntu${OS}04-vm1" out
   ssh_host "$TOOL delete -f my-vm1" 2>/dev/null || true

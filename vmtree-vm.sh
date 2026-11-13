@@ -143,7 +143,7 @@ if ! $TOOL info "$VM" >/dev/null 2>&1 ; then
 	fi
 	# launch docker-capable vm
 	echo "Initializing" >&2
-	$TOOL init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null
+	$TOOL init "${IMAGE}" "$VM" "${OPTS[@]}" >&2 </dev/null || exit 1
 	# Mount disk if exists
 	if [[ -d "$DISKPATH" ]]; then
 		echo "Attaching disks/$DISK" >&2
