@@ -182,6 +182,7 @@ packages:
 - tmux
 - unattended-upgrades
 - unzip
+- util-linux-extra
 - vim-nox
 - wget
 write_files:
