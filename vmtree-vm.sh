@@ -71,6 +71,7 @@ case "$TOOL" in
 		images["ubuntu2204"]="images:ubuntu/jammy/cloud"
 		;;
 	lxc)
+		# XXX The only reason we use minimal-daily is because it gets the most frequent updates, which is important for security.
 		images["ubuntu2610"]="ubuntu-minimal-daily:26.10"
 		images["ubuntu2604"]="ubuntu-minimal-daily:26.04"
 		images["ubuntu2404"]="ubuntu-minimal-daily:24.04"
