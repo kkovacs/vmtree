@@ -2,3 +2,5 @@
 /.env
 /templates/Caddyfile.local
 /disks/
+/test/id_ed25519*
+/test/log/

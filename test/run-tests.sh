@@ -61,14 +61,17 @@ ssh_lxd() {
     -o ServerAliveInterval=5 -o ServerAliveCountMax=2
     -o "ProxyCommand=ssh ${SSH_OPTS[*]} vmtree@${d} %h"
     -i "$SSH_KEY")
-  local a=0 rc=0
+  # NORETRY=1: single attempt (the probe+real double-run breaks "ssh -f" tunnels)
+  [[ -n "${NORETRY:-}" ]] && { timeout 120 "${sc[@]}" "$@"; return $?; }
+  local a=0 rc
   while (( a < 4 )); do
-    if timeout 120 "${sc[@]}" "$@" >/dev/null 2>&1; then
-      timeout 180 "${sc[@]}" "$@"; return $?
-    fi
-    rc=$?
+    # Quiet probe; retry only on ssh errors (255) and timeouts (124).
+    # (rc must be captured via "||": $? after a failed "if" without else is 0.)
+    rc=0
+    timeout 120 "${sc[@]}" "$@" >/dev/null 2>&1 || rc=$?
+    (( rc == 0 )) && { timeout 180 "${sc[@]}" "$@"; return $?; }
     [[ $rc -ne 255 && $rc -ne 124 ]] && return $rc
-    ((a++))
+    ((++a))  # not a++: that evaluates to 0 on the first pass and trips set -e
     sleep $((2 ** a))
   done
   timeout 180 "${sc[@]}" "$@"
@@ -160,6 +163,53 @@ test_caddy_active()      { ssh_host "systemctl is-active caddy"; }
 test_vmtree_user()       { ssh_host "id vmtree"; }
 test_storage_pool()      { ssh_host "$TOOL storage show default"; }
 test_force_command()     { ssh_host "grep -q 'command=' /home/vmtree/.ssh/authorized_keys"; }
+
+# The requested VM name is client input: anything but "word(-word)*" must be rejected.
+# (No '-x' case: ssh would parse it as its own option.)
+test_invalid_vm_names() {
+  local ip name out rc
+  ip=$(get_ip)
+  for name in 'a b' '*' 'a;b' '$(id)' 'a--b'; do
+    rc=0
+    out=$(timeout 30 ssh "${SSH_OPTS[@]}" "vmtree@$ip" "$name" 2>&1 </dev/null) || rc=$?
+    [[ $rc -ne 0 && "$out" == *"invalid VM name"* ]] || { echo "NOT REJECTED: '$name' rc=$rc out=$out"; return 1; }
+  done
+}
+
+# The outer vmtree@host session must NOT allow port forwarding to the host
+# (e.g. Caddy admin API on 127.0.0.1:2019).
+test_no_host_forwarding() {
+  local ip sock crc=0 rc=0
+  ip=$(get_ip)
+  sock=$(mktemp -u /tmp/vmtree-nofwd.XXXXXX)
+  # Positive control: the target must be reachable from the host itself
+  ssh_host "curl -sf -m 5 http://127.0.0.1:2019/config/ >/dev/null"
+  # -N: no command, so the forced command never runs and the tunnel stays up
+  ssh -f -N "${SSH_OPTS[@]}" -o ExitOnForwardFailure=yes -o ControlMaster=yes -o ControlPath="$sock" \
+    -L 127.0.0.1:12019:127.0.0.1:2019 "vmtree@$ip"
+  curl -s -m 5 http://127.0.0.1:12019/config/ >/dev/null 2>&1 || crc=$?
+  ssh -o ControlPath="$sock" -O exit "vmtree@$ip" 2>/dev/null || true
+  # curl 7 = nothing listening locally, i.e. the tunnel never existed: test proves nothing
+  [[ $crc -ne 0 && $crc -ne 7 ]] || { echo "host forwarding NOT blocked (or no tunnel), curl rc=$crc"; rc=1; }
+  return $rc
+}
+
+# Port forwarding INSIDE the VM (through the ProxyCommand) must keep working.
+test_vm_forwarding() {
+  local sock target rc=1 i
+  sock=$(mktemp -u /tmp/vmtree-fwd.XXXXXX)
+  target="user@my-test1${VM_SUFFIX}.${DOMAIN}"
+  ssh_host "$TOOL exec my-test1 -- bash -c 'echo fwd-ok >/tmp/fwd.txt; cd /tmp; setsid nohup python3 -m http.server 8080 >/dev/null 2>&1 </dev/null &'"
+  NORETRY=1 ssh_lxd -f -N -o ExitOnForwardFailure=yes -o ControlMaster=yes -o ControlPath="$sock" \
+    -L 127.0.0.1:18080:127.0.0.1:8080 "$target"
+  for i in {1..15}; do
+    curl -sf -m 2 http://127.0.0.1:18080/fwd.txt | grep -q fwd-ok && { rc=0; break; }
+    sleep 1
+  done
+  ssh -o ControlPath="$sock" -O exit "$target" 2>/dev/null || true
+  ssh_host "$TOOL exec my-test1 -- pkill -f 'http.server 8080'" || true
+  return $rc
+}
 
 test_create_vm() {
   local out
@@ -309,8 +359,11 @@ else
   test_vmtree_user
   test_storage_pool
   test_force_command
+  test_invalid_vm_names
   test_create_vm
   test_vm_running
+  test_no_host_forwarding
+  test_vm_forwarding
   test_vm_ping
   test_caddy_proxy
   test_caddy_auth_required

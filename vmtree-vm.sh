@@ -12,16 +12,18 @@ source detect.sh
 
 # Script's first parameter is ssh pubkey name (username)
 SSHUSER="$1"
-shift
 
-# Strip VM name of domain, then split on "-"
-# XXX Should be a better way of splitting that doesn't mess with IFS
-SAVEIFS="$IFS"
-# Shellcheck thinks we don't want splitting, but we do.
-# shellcheck disable=SC2206
-IFS="-" PARTS=( ${1%%.*} )
-IFS="$SAVEIFS"
-unset SAVEIFS
+# The requested VM name comes from the client, so read it from the environment
+# (instead of having sshd's shell expand it unquoted on the command line,
+# which would word-split and glob it). Strip domain, then validate strictly.
+VMREQ="${SSH_ORIGINAL_COMMAND%%.*}"
+if [[ ! "$VMREQ" =~ ^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$ ]]; then
+	echo "ERROR: invalid VM name" >&2
+	exit 1
+fi
+
+# Split on "-" (read -a does no globbing)
+IFS="-" read -ra PARTS <<<"$VMREQ"
 
 # One word vmname or more?
 if [[ ${#PARTS[@]} -eq 1 ]]; then
@@ -99,6 +101,11 @@ images["oracle10"]="images:oracle/10/cloud"        # New, not tested yet
 #images["oracle7"]="images:oracle/7/cloud"         # "requires a CGroupV1 host system"
 echo -e "Available images (user-vmname-IMAGE): ${!images[*]}" >&2
 IMAGE="${images[$REQIMAGE]}"
+# Fail fast: an unknown image name would otherwise reach "$TOOL init" as ""
+if [[ -z "$IMAGE" ]]; then
+	echo "ERROR: unknown image \"$REQIMAGE\"" >&2
+	exit 1
+fi
 
 # Show info
 printf "Connecting SSHUSER=$SSHUSER VM=$VM IMAGE=$IMAGE DISK=$DISK\n\nThis VM's port 80 is: https://$VM.$DOMAIN/ ( $AUTHUSER / $AUTHPASS )\n\n" >&2
@@ -160,6 +167,7 @@ packages:
 - git
 - gron
 - htop
+- iputils-ping
 - jq
 - less
 - man-db
