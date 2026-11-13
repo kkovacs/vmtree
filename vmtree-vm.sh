@@ -78,17 +78,20 @@ esac
 # Others:
 images["alma8"]="images:almalinux/8/cloud"         # Works, not thoroughly tested
 images["alma9"]="images:almalinux/9/cloud"         # Works, not thoroughly tested
-images["centos8"]="images:centos/8-Stream/cloud"   # Works, not thoroughly tested
+images["alma10"]="images:almalinux/10/cloud"       # New, not tested yet
 images["centos9"]="images:centos/9-Stream/cloud"   # Works, not thoroughly tested
+images["centos10"]="images:centos/10-Stream/cloud" # New, not tested yet
 images["debian11"]="images:debian/11/cloud"        # First connect never works, SSH install takes time
 images["debian12"]="images:debian/12/cloud"        # First connect never works, SSH install takes time
 images["debian13"]="images:debian/13/cloud"        # Works, not thoroughly tested
 images["rocky8"]="images:rockylinux/8/cloud"       # Works, not thoroughly tested
 images["rocky9"]="images:rockylinux/9/cloud"       # Works, not thoroughly tested
+images["rocky10"]="images:rockylinux/10/cloud"     # New, not tested yet
 images["suse"]="images:opensuse/tumbleweed/cloud"  # Works, not thoroughly tested
-images["suse155"]="images:opensuse/15.6/cloud"     # Works, not thoroughly tested. Unfortunately there is no plain "15", so minor version will need to be updated
+images["suse16"]="images:opensuse/16.1/cloud"      # New, not tested yet. No plain "16", so minor version will need updating again
 images["oracle8"]="images:oracle/8/cloud"          # Works, not thoroughly tested
 images["oracle9"]="images:oracle/9/cloud"          # Works, not thoroughly tested
+images["oracle10"]="images:oracle/10/cloud"        # New, not tested yet
 # Tested NOT working:
 #images["alpine"]="images:alpine/edge/cloud"       # Needs manual enable of user account and shell change
 #images["arch"]="images:archlinux"                 # Needs "pacman -S openssh && systemctl enable --now sshd", add ssh key, then ssh to root@... works
